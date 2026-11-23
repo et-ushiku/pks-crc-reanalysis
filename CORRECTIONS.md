@@ -1,0 +1,190 @@
+# Claims we made and then had to withdraw
+
+This file exists because the interesting part of a negative result is whether the
+person reporting it was willing to be wrong in public. Each item is a statement we
+wrote down, believed, and later refuted with our own data. Nothing here was deleted
+from the record; the superseded statements are kept so the reasoning can be audited.
+
+---
+
+## 1. "The breadth ceiling is 0.9589"
+
+**What we said.** That 0.9589 was the maximum attainable breadth, because the
+duplicated region is always lost.
+
+**Why it was wrong.** A sample came in at 0.9598. Then others above that, up to
+0.9607.
+
+**Root cause.** We took the highest value we had seen in a handful of deep samples and
+promoted it to a derived constant. It was an observation, not a derivation.
+
+**What is actually derivable.** If both copies of the 1,248 bp duplication are lost
+entirely, breadth is `(49455 - 2496) / 49455 = 0.9495`. Reads that happen to span a
+position where the two copies differ (they are 99.840% identical, so 0.16% of
+positions) can still be placed, which lifts breadth above that figure by a
+sample-dependent amount. **The ceiling is not a fixed number.** The defensible
+statements are: 0.9495 is what you get if the duplication is lost completely, and no
+sample in 397 exceeded 0.99.
+
+---
+
+## 2. "In a carrier, the uncovered bases lie only inside the duplication"
+
+**What we said.** That for any sample with breadth >= 0.5, every uncovered base would
+fall inside the duplicated region.
+
+**Why it was wrong.** We checked all 44 positive samples. **Only 9 satisfied it.**
+Twenty-five samples had breadth below the 0.9495 figure while still passing the
+>= 14/18 gene rule, which is impossible if the duplication is the only thing missing.
+
+**Root cause.** Same as item 1: we generalised from the three or four deepest samples
+in hand, which happened to be the ones where it was true.
+
+**What replaced it.** The duplication loss is near-constant and depth-independent
+(1,920-2,140 bp in the 13 samples at >= 10x island depth), while everything outside
+the duplication is depth-limited. At >= 10x, 11 of 13 samples have zero missing bases
+outside the duplication; below 2x the median missing runs to thousands of bases.
+This is now [PITFALLS.md](PITFALLS.md) item 4, and it is the reason the rarefied
+analysis is primary rather than a sensitivity check.
+
+---
+
+## 3. The density ratio R was treated as if it were a population fraction
+
+**What we said.** We computed `R = (island reads / 49,455) / (marker reads / marker
+bp)` and read values near 1 as "this species carries one island per genome", without
+having established the scale.
+
+**Why it was wrong.** R clustered near 1.9 for samples where *E. coli* was plainly the
+carrier. A ratio with a 1.9x offset cannot be read as a fraction.
+
+**Root cause.** We validated the ratio's ordering and never its scale.
+
+**What we did.** Decomposed the offset: 1.115 (reads counted over the 55,140 bp
+reference but divided by the 49,455 bp gene total) x 1.14 (marker fragments lose
+coverage at their ends) x ~1.50 (residual mappability difference), product ~1.9,
+stable across read lengths of 84, 94 and 100 bp. R is now used only for the one-sided
+inference "R >> 1 means that species cannot account for the island", which a 1.9x
+offset cannot overturn. R never entered the pre-specified calling criteria, so no
+result changed.
+
+---
+
+## 4. "There was no difference" in CN-CRC, stated with the unrarefied numbers
+
+**What we said**, at the head of the CN-CRC write-up: no difference; CRC 15.9% (7/44)
+vs control 18.2% (6/33), OR 0.85, Fisher P = 1.00.
+
+**Why it was wrong.** Those are the **unrarefied** numbers, and our own pre-specified
+primary analysis rarefies to a common depth first. Rarefied, the same cohort gives
+6/44 vs 2/33, OR **2.13**, P = 0.454. **The direction reverses.**
+
+**Root cause.** The headline was written before the rarefied analysis existed and was
+never revisited when it did. The correction was recorded further down the document
+while the opening paragraph still asserted the old number, which is the version
+anyone would actually read.
+
+**What is correct.** Neither result is significant, so "no significant difference"
+stands. But "there was no difference" overstates it, and "fewer carriers in cancer" is
+not supported. At 6-8 positives the direction is not determined.
+
+---
+
+## 5. We looked at a group comparison before the cohort had finished
+
+**What happened.** We had committed in writing to completing all 120 DE-CRC samples
+before looking at any group difference. While testing that the cohort was wired into
+the analysis script correctly, we ran the script, which prints per-cohort P values, at
+77 of 120 samples. So we saw the group split early.
+
+**What we did about it.** Recorded it in the project log with a timestamp. No threshold
+was changed, no sample was added or dropped, and the cohort was run to completion. But
+it is a real breach of the procedure we had set, and a reader is entitled to weigh the
+DE-CRC result accordingly: it is the cohort nearest to significance.
+
+---
+
+## 6. A download bug that would have produced a half-depth sample
+
+Not a claim, but a near-miss worth recording. Our fetch script expanded a
+semicolon-separated URL list by piping `printf` output through `tr`. With no trailing
+newline, `wc -l` returns 1 instead of 2 and a `while read` loop discards the final
+line. The script would have downloaded only the first mate file, counted it as
+complete, written its completion marker, and handed a half-depth sample to the
+pipeline as if it were whole.
+
+It was caught before any sample was measured, because the file count was checked
+against the ENA manifest rather than against the script's own loop. Fix: expand URLs
+into a file, one per line, and count with `grep -c .`. The lesson we drew is to verify
+completeness against the external source of truth, never against the code that just
+did the work.
+
+---
+
+---
+
+## 7. "Not measured" was published as "zero" (found while preparing this release)
+
+**What was wrong.** `data/per_sample.tsv` reported `kpneumoniae_pct = 0.000000` for 27
+CN-CRC samples that have **no marker table at all**. Those samples were run through a
+dedicated *E. coli* index before the combined Enterobacteriaceae index existed, so the
+*K. pneumoniae* marker counts were never computed. The generator read a missing file
+as zero hits and divided by the read count, producing a confident 0.000000.
+
+**Root cause.** `marker_pct()` initialised `hit = 0` and only overwrote it if the
+counts file existed. A missing input and a true zero took the same path.
+
+**Why it matters.** "No *Klebsiella* detected" and "*Klebsiella* never looked for" are
+different statements, and the second one was being published as the first. Anyone
+computing *Klebsiella* prevalence from that column would have reported 27 false
+negatives.
+
+**What changed.** `marker_pct()` now returns NA when the counts file is absent. The
+column is NA for 176 samples (149 that were never run through the combined index at
+all, plus these 27) and a real value for 96.
+
+**Effect on the result: none.** The abundance gate uses *E. coli*, which is measured
+for all 397 samples from a dedicated path (0 NA). The primary analysis is unchanged:
+167 judgeable, Mantel-Haenszel OR 1.91, 95% CI 0.76-4.75, P = 0.1663, I2 = 17%,
+verified by re-running `code/analyse.py` after the fix.
+
+**How it surfaced.** Two control samples, `n_ERR1018236` and `n_ERR1018237`, had almost
+identical *K. pneumoniae* genome coverage (depth 2.063 / breadth 0.7643 and
+2.036 / 0.7638) while their marker columns read 0.000000 and 0.006483. A genome signal
+that strong with no marker reads should be impossible, so one of the two numbers had to
+be wrong. It was the zero.
+
+## 8. We read `cancer_ERR1018282` as *Klebsiella* because *Klebsiella* was abundant
+
+**What we said.** That `cancer_ERR1018282` leaned toward *K. pneumoniae*, on the
+grounds that its Kp relative abundance was 6.83% against *E. coli* at 0.178% - a factor
+of 38.
+
+**Why it was wrong.** The six-genome measurement puts Kp at 109x genome depth and
+*E. coli* at 3.5x, while the island sits at 3.0x. The island therefore matches
+*E. coli* almost exactly (ratio 0.85, i.e. ~85% of *E. coli* cells carrying one copy)
+and matches Kp not at all (ratio 0.03, i.e. 1 Kp cell in 33). **The more abundant
+species is the one the island does not track.**
+
+**Root cause.** We ranked candidates by how much of each species was present, when the
+question is what fraction of each species carries the island. Those are different
+quantities, and for a mobile element they can point in opposite directions. Abundance
+was the only evidence available for this sample at the time, which is a reason to have
+marked it undetermined rather than leaning.
+
+**What replaced it.** `cancer_ERR1018282` is now attributed to *E. coli*, and it is
+reported in [RESULTS.md](RESULTS.md) alongside `cancer_ERR1018198` as a counterexample
+to abundance-based attribution - the case where the pull of abundance is strongest
+(109x) and still wrong. Our *Klebsiella* count for CN-CRC is unchanged at 2, because
+the sample we removed from the *Klebsiella* side was never counted there in the final
+tally; what changed is that it is now positively assigned rather than left leaning.
+
+---
+
+## What did not change
+
+No pre-specified threshold was altered at any point after results were seen:
+`MIN_DEPTH = 1`, `GENE_COVER = 0.5`, `CALL_BREADTH = 0.5`, `CALL_GENES = 14`,
+`SUSPECT_BREADTH = 0.1`, `ECOLI_MIN = 0.1`, target depth 20M reads, MAPQ 20.
+They are hard-coded at the top of `code/analyse.py` and can be checked against any
+version of this history.

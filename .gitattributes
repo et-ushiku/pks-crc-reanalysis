@@ -1,0 +1,9 @@
+# Keep line endings LF in the repository and on checkout.
+# The scripts in pipeline/ run under bash; a CRLF shebang line breaks them on Linux,
+# and the data tables are parsed by split("\t") with a stripped trailing newline.
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.tsv text eol=lf
+*.bed text eol=lf
+*.md text eol=lf

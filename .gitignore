@@ -1,0 +1,10 @@
+# 生データと中間ファイルは置かない。配るのは data/ の派生表だけ。
+*.fastq.gz
+*.fq.gz
+*.bam
+*.bam.bai
+*.sam
+*.bt2
+*.depth.tsv
+__pycache__/
+*.pyc
