@@ -136,6 +136,20 @@ Reference: *E. coli* IHE3034 *pks* island, GenBank **AM229678.1** (55,140 bp).
 - **No wet-lab work.** No isolates, no PCR, no colibactin measurement.
 - One operator, one analysis, no independent replication of the code.
 
+## Related work by the same author
+
+[et-ushiku/crc-microbiome-reproduction](https://github.com/et-ushiku/crc-microbiome-reproduction)
+reanalyses the same kind of public stool metagenomes for a different question:
+whether the **community as a whole** separates CRC from control. It does, at a
+leave-one-study-out mean AUC of 0.82 over 9 cohorts and 824 people.
+
+Put beside the present result, the pair says something worth stating plainly: **the
+community-level signal is real and reproducible, and the carriage of this one island
+is not where it lives.** A single mobile element, even one with a demonstrated
+mutational mechanism, is not the thing that distinguishes these groups. Neither result
+is a screening test, and the limitations in both repositories should be read before
+either number is quoted.
+
 ## License
 
 Code: MIT (see [LICENSE](LICENSE)).
