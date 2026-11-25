@@ -293,6 +293,76 @@ def assembly():
         print("   inferred by the assembler. That is what rules out a chimera.")
 
 
+# -------------------------------------------------------------- 6. kleborate
+def _kleborate(name):
+    """Read Kleborate's one-row output into a {column: value} dict."""
+    fh = io.open(os.path.join(DATA, "kleborate", name), encoding="utf-8")
+    hd = fh.readline().rstrip("\n").split("\t")
+    val = fh.readline().rstrip("\n").split("\t")
+    return dict(zip(hd, val))
+
+
+def typing():
+    print()
+    print("=" * 70)
+    print("6. The strain typing, and which run each part of it comes from")
+    print("=" * 70)
+    keys = [
+        ("enterobacterales__species__species", "species"),
+        ("general__contig_stats__contig_count", "contigs"),
+        ("general__contig_stats__total_size", "total bp"),
+        ("general__contig_stats__largest_contig", "largest contig"),
+        ("klebsiella_pneumo_complex__mlst__ST", "MLST"),
+        ("klebsiella_pneumo_complex__kaptive__K_type", "K type"),
+        ("klebsiella__ybst__Yersiniabactin", "yersiniabactin"),
+        ("klebsiella__cbst__CbST", "CbST"),
+        ("klebsiella__cbst__Colibactin", "colibactin"),
+    ]
+    a, b = _kleborate("kp_bin_output.tsv"), _kleborate("kp_plus_output.tsv")
+    print("   %-15s | %-22s | %-24s"
+          % ("", "kp_bin (automatic)", "kp_plus (+island contigs)"))
+    print("   %-15s-+-%-22s-+-%-24s" % ("-" * 15, "-" * 22, "-" * 24))
+    for k, lab in keys:
+        x, y = a.get(k, "?"), b.get(k, "?")
+        print("   %-15s | %-22s | %-24s%s"
+              % (lab, x, y, "" if x == y else "   <- differs"))
+    print()
+    print("   RESULTS.md quotes ST23/K1/ICEKp10/clb for this sample. The species,")
+    print("   the ST and the K type come from the automatic bin; ICEKp10 and a")
+    print("   complete clb 2 appear only once the island-bearing contigs are")
+    print("   added by hand. See CORRECTIONS.md item 16.")
+    print()
+
+    mem = load("kleborate/bin_membership.tsv")
+    added = [r for r in mem if r["in_kp_plus"] == "yes" and r["in_kp_bin"] == "no"]
+    isl = [r for r in mem if r["carries_island"] == "yes"]
+    print("   Bin membership: %d contigs in kp_bin, %d in kp_plus, %d carry island."
+          % (sum(1 for r in mem if r["in_kp_bin"] == "yes"),
+             sum(1 for r in mem if r["in_kp_plus"] == "yes"), len(isl)))
+    ok = all(r["carries_island"] == "yes" for r in added)
+    print("   The %d added contigs are %sall island-bearing, so kp_plus is exactly"
+          % (len(added), "" if ok else "NOT "))
+    print("   kp_bin plus every contig carrying any part of the island.")
+    asg = {r["contig"]: r["best_species"]
+           for r in load("kleborate/contig_assignment.tsv")}
+    for r in added:
+        print("     %-14s %7s bp   minimap2 assigned it to %s"
+              % (r["contig"], r["contig_bp"], asg.get(r["contig"], "?")))
+    print()
+    print("   Why none of them could be assigned to Klebsiella:")
+    for r in load("clb_in_six_genomes.tsv"):
+        n, s = float(r["island_kmers"]), float(r["shared_kmers"])
+        print("     %-22s %6.2f%% of the island's 40-mers, %s/%s clb genes"
+              % (r["genome"], 100.0 * s / n, r["clb_genes_at_half"],
+                 r["clb_genes_total"]))
+    print("   K. pneumoniae HS11286 carries no clb island, so a clb-bearing contig")
+    print("   can only ever be assigned to E. coli or C. koseri. Adding them was")
+    print("   forced by the reference set rather than chosen for this sample - but")
+    print("   the typing is then not independent evidence that those contigs are")
+    print("   Klebsiella's. The independent evidence is section 5: a single contig")
+    print("   carries the chromosome and the island with no gap in read depth.")
+
+
 def main():
     rows = load("per_sample.tsv")
     depth_difference(rows)
@@ -300,6 +370,7 @@ def main():
     regression(rows)
     carriers()
     assembly()
+    typing()
 
 
 if __name__ == "__main__":

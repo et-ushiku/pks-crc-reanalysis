@@ -11,7 +11,7 @@ Three of the four have their core already in the literature:
 
 | Item | Status |
 |---|---|
-| 1. The duplication | **The repeat itself is published.** Auvray et al. 2021 report recombination between "two copies of a 1480 bp homologous sequence located in *clbJ* and *clbK*". What we add is its effect on read mapping, and a measurement of its extent that does not match theirs. It is a pitfall **for breadth-based methods, ours included**, and barely touches read-count methods - see [the correction](#item-1-is-a-pitfall-for-breadth-based-methods-which-includes-ours). |
+| 1. The duplication | **The repeat itself is published.** Auvray et al. 2021 report recombination between "two copies of a 1480 bp homologous sequence located in *clbJ* and *clbK*". What we add is its effect on read mapping, and a measurement of its extent that does not match theirs. **Kleborate's own colibactin typing scheme already excludes both genes**: it types 15 loci, *clbA*-*clbI* and *clbL*-*clbQ*, and has no column for *clbJ* or *clbK* - see `data/kleborate/kp_bin_output.tsv`. It is a pitfall **for breadth-based methods, ours included**, and barely touches read-count methods - see [the correction](#item-1-is-a-pitfall-for-breadth-based-methods-which-includes-ours). |
 | 2. Read counts are not abundance | **Both the principle and the premise are published.** Breadth-based presence calling over read counts is an established idea in metagenomics methods, and Blanco-Míguez et al. 2023 state that the AM229678 cluster contains "genes not belonging to the island". What we add is the quantification for this reference and the demonstration that *pks* studies still call by read count. |
 | 3. The density-ratio offset | We found no report of this specific offset. The general class - mappability and average-genome-size biases in metagenomic gene abundance - is well established. |
 | 4. Depth-limited breadth | **The principle is published, and stated for this island.** Nooij et al. 2021 write that "metagenomics-based assays require high sequencing depths to reliably detect single genes" and subsample to a common 10 million read pairs. What we add is the threshold at which breadth stops being depth-limited (~10x island depth) and a worked example where the confounding is real. |
@@ -56,6 +56,18 @@ carrying a 5,651 bp deletion that fuses *clbJ* and *clbK* into one gene, and wro
 Their deletion size is almost exactly our spacing between the two copies: we measure
 **5,653 bp** between equivalent positions, they report **5,651 bp**. It is the same
 repeat and the same recombination.
+
+### A typing scheme already leaves these two genes out
+
+Kleborate (v3.2.4) assigns a colibactin sequence type from **15 loci: *clbA* through
+*clbI*, and *clbL* through *clbQ*.** There is no *clbJ* or *clbK* column in its output
+at all - visible directly in `data/kleborate/kp_bin_output.tsv`, which this repository
+ships. Those are exactly the two genes that contain the duplication described above.
+
+We do not know the scheme's stated reason for omitting them and are not claiming one;
+the output does not say. But a widely used typing tool treating *clbJ* and *clbK* as
+not usable is further evidence that the problem is known, and one more reason to read
+our item 1 as "not applied to *pks* detection from stool" rather than as new.
 
 Their only methodological caution is about assembly, not mapping:
 

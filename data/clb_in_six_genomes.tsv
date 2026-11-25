@@ -1,0 +1,7 @@
+genome	genome_bp	island_kmers	shared_kmers	clb_genes_at_half	clb_genes_total
+Ecoli_IHE3034	5108383	55101	55101	18	18
+Ckoseri_BAA895	4720462	55101	52279	18	18
+Kaerogenes_KCTC2190	5280350	55101	71	0	18
+Kpneumoniae_HS11286	5333942	55101	63	0	18
+Cfreundii_CFNIH1	5099034	55101	44	0	18
+Ecloacae_ATCC13047	5314581	55101	44	0	18

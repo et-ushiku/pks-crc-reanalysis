@@ -159,6 +159,55 @@ the search:
   paper, and **the actual q value and coefficient are never reported**, so the distance
   from significance cannot be read off. We rely on their conclusion, not on a number.
 
+## Carrier attribution, assembly and typing
+
+This is the part of the work RESULTS.md leads with, and until recently its methods
+were not written down here at all (CORRECTIONS.md items 15 and 16).
+
+**Step 1, density ratio.** For every positive sample, R = (island reads / 49,455 bp)
+divided by (marker reads / marker bp) for the candidate species. R near 1 means that
+species could carry one island copy per genome; R in the hundreds means it cannot
+account for the island at all. R carries a systematic offset of about 1.9x, decomposed
+in `code/verify_extra.py`; the offset is irrelevant at the scale that matters for
+exclusion.
+
+**Step 2, six competing genomes.** For the 14 CN-CRC positives, the reads were mapped
+to a **single** index holding six complete Enterobacteriaceae genomes - *E. coli*
+IHE3034 (CP001969.1), *K. pneumoniae* HS11286 (CP003200.1), *C. freundii* CFNIH1
+(CP007557.1), *C. koseri* BAA-895 (CP000822.1), *E. cloacae* ATCC13047 (CP001918.1),
+*K. aerogenes* KCTC2190 (CP002824.1) - at MAPQ 20, so the species compete and
+cross-species bleed is filtered rather than counted twice. The readout is island depth
+divided by that species' genome depth, from the same read set. `pipeline/asm_genomes.sh`.
+
+**Two properties of the reference set a reader needs.** Only *E. coli* IHE3034 (100%)
+and *C. koseri* BAA-895 (94.88%) carry a *clb* island; the other four share under
+0.15% of its 40-mers and none of its 18 genes (`data/clb_in_six_genomes.tsv`). So
+(a) *C. koseri*'s apparent genome breadth in these samples - never above 0.028 - is
+mostly the 1.1% of its genome that the island accounts for, not the organism, and
+(b) a contig made of *clb* can never be assigned to *Klebsiella* by this index. Point
+(b) is what forced the second Kleborate run described below.
+
+**Step 3, assembly.** `pipeline/asm_assemble.sh` assembles one sample with megahit,
+aligns the island to the contigs to find those carrying it, and aligns those contigs
+to the six genomes with `minimap2 -x asm10`. Per contig, matched bases are summed per
+species and the species with the most wins, with the winner required to cover at least
+half the contig. Summing before dividing matters: one contig aligns in several
+fragments, so a per-row coverage test rejects everything.
+
+**Step 4, is the join real.** A contig that carries chromosome and island contiguously
+could still be an assembler chimera. `pipeline/asm_junction.sh` remaps the reads to
+that contig and counts pairs and single reads spanning the junction, and the depth
+across it. A chimera gives zero spanning evidence and a depth collapse; this one has a
+minimum depth of 12 and **no base at zero** (`data/assembly_junction_depth.tsv`).
+
+**Step 5, typing.** Kleborate 3.2.4, `-p kpsc`, on the species-assigned bin
+(`pipeline/asm_kleborate.sh`), and then on that bin plus the island-bearing contigs
+(`pipeline/asm_kleborate_plus.sh`). Both outputs are in `data/kleborate/`. **They do
+not agree, and the difference matters**: species, ST and K type come from the
+automatic bin, while ICEKp10 and a complete *clb* 2 appear only in the second run.
+A typing from a hand-assembled bin is not independent evidence of what the added
+contigs belong to - that evidence is step 4. See CORRECTIONS.md item 16.
+
 ## Statistics
 
 - Per cohort: Fisher's exact test, two-sided (own implementation, `fisher()` in
@@ -177,7 +226,9 @@ the search:
 
 - No adjustment for age, sex, BMI or study. Piccinno et al. 2025 adjust for age and
   sex; we do not have those covariates assembled for all four cohorts.
-- No per-strain analysis, no assembly for most samples, no wet-lab confirmation.
+- No per-strain analysis, no assembly for most samples, no wet-lab confirmation. One
+  sample was assembled and typed; its ICEKp10 call depends on a bin we assembled by
+  hand, and nothing here is confirmed in culture.
 - No correction for human-read contamination beyond an upper bound (the cohorts
   differ in host-removal preprocessing; one cohort's exact preprocessing is
   unpublished).

@@ -444,9 +444,9 @@ each claim, which shipped file would a reader open", and we ran it only when ask
 **What is still not verifiable from this repository**, listed so it is not discovered
 a fourth time:
 
-- **The *Klebsiella* strain typing** of `cancer_ERR1018186` (ST23/K1/ICEKp10) comes
-  from Kleborate output that is not shipped. The contig evidence above does not depend
-  on it.
+- ~~**The *Klebsiella* strain typing** of `cancer_ERR1018186` (ST23/K1/ICEKp10) comes
+  from Kleborate output that is not shipped.~~ **Now shipped** under
+  `data/kleborate/`, which turned out to matter more than we expected - see item 16.
 - **The marker-index constants** (96,300 bp over 122 fragments for *E. coli*;
   `PER_PCT = 313`) are stated in `pipeline/entero_ref.py` but reproducing them means
   rebuilding the index.
@@ -454,6 +454,80 @@ a fourth time:
   published image, not from their data, and PITFALLS.md says so where they appear.
 - **Everything quoted from a paper** is verifiable only by reading that paper; the
   DOIs and PMC identifiers are given.
+
+---
+
+## 16. The strain typing was one line made of two runs
+
+Asked to ship the Kleborate output as well, we did, and the output does not say what
+the one-line typing in RESULTS.md said. **"ST23/K1/ICEKp10/*clb*" is two runs put
+together**, and only the first half comes from the bin that was assembled
+automatically.
+
+| | `kp_bin` (62 contigs the assignment step gave to *K. pneumoniae*) | `kp_plus` (that bin plus the 4 island-bearing contigs) |
+|---|---|---|
+| species | *Klebsiella pneumoniae*, strong | same |
+| MLST | **ST23** | same |
+| K type | **K1** | same |
+| yersiniabactin | **none detected** | **ybt 1; ICEKp10** |
+| CbST | 26-6LV | 29 |
+| colibactin | **clb 2 (incomplete)**, *clbA*-*clbI* only | **clb 2**, complete |
+
+So the species, the ST and the K type are robust: they come from 5,082,743 bp of
+chromosome that the six-genome assignment placed in *K. pneumoniae* on its own.
+**ICEKp10 and the complete *clb* 2 do not.** They appear only after four contigs are
+added by hand, and the assignment step had given all four to *C. koseri* BAA-895.
+
+### Why those contigs were added, and why it still limits the claim
+
+Not because the sample needed it. **The reference set makes it impossible to assign a
+*clb* contig to *Klebsiella*:**
+
+| Reference genome | Share of this island's 40-mers | *clb* genes present |
+|---|---|---|
+| *E. coli* IHE3034 | 100.00% | 18/18 |
+| *C. koseri* BAA-895 | **94.88%** | **18/18** |
+| *K. aerogenes* KCTC2190 | 0.13% | 0/18 |
+| ***K. pneumoniae* HS11286** | **0.11%** | **0/18** |
+| *C. freundii* CFNIH1 | 0.08% | 0/18 |
+| *E. cloacae* ATCC13047 | 0.08% | 0/18 |
+
+HS11286 carries no *clb* island at all, so any contig made of *clb* can only ever be
+won by *E. coli* or *C. koseri*. Adding the island contigs back was forced by the
+reference set, not chosen after seeing the answer, and the rule is checkable:
+`kp_plus` is **exactly** `kp_bin` plus every contig carrying any part of the island,
+which `python3 code/verify_extra.py` asserts.
+
+But the consequence stands either way: **a typing produced from a bin we assembled by
+hand is not independent evidence that those contigs belong to this *Klebsiella*
+genome.** We presented ICEKp10 as though it were.
+
+The independent evidence is the one from item 15, and it does not use the added
+contigs: `k119_45171` carries 354 kb of *K. pneumoniae* chromosome and 32 kb of the
+island contiguously, with read depth never dropping to zero across the join - and that
+contig is in the automatic bin. Consistently with this, the automatic bin alone types
+as *clbA*-*clbI*, which are the clb genes that contig physically carries: reference
+positions 17,195-54,756 span *clbA* through *clbJ* and part of *clbK* (the island's
+gene order runs *clbQ* first in this reference), and Kleborate types neither *clbJ*
+nor *clbK*.
+
+**What changed in the text:** RESULTS.md now says which run each part of the typing
+comes from, instead of running them together.
+
+### One thing found while checking this
+
+Kleborate's colibactin scheme types 15 loci and has **no *clbJ* or *clbK* column**.
+Those are the two genes holding the duplication of PITFALLS item 1. We do not know the
+scheme's reason and do not claim one, but a widely used tool already leaving those two
+out is one more reason that item 1 is "known but not applied", not new. Added to
+PITFALLS.md item 1.
+
+### What this says about the pattern
+
+Items 13, 15 and 16 are the same mistake three times. Each time, **a claim was correct
+in substance and wrong in what it attributed to the evidence we had.** Shipping the
+evidence is what exposed it. Items 15 and 16 were both found by someone asking for the
+underlying file, not by us re-reading the text.
 
 ---
 

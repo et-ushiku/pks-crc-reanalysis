@@ -141,7 +141,8 @@ python3 code/verify_rarefy.py    # checks the analytic rarefaction against
                                  # actually rarefied reads (5 runs, 2 samples)
 python3 code/verify_extra.py     # recomputes the figures that used to be
                                  # uncheckable: the depth split, the ratio offset,
-                                 # the regression, the carrier table, the junction
+                                 # the regression, the carrier table, the junction,
+                                 # the strain typing
 python3 code/verify_repeat.py    # recomputes the duplication from AM229678.1
                                  # (the only script that needs network)
 ```
@@ -172,12 +173,14 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
-| `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table and the assembly junction |
+| `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction and the strain typing |
 | `code/verify_repeat.py` | Fetches AM229678.1 from ENA and recomputes the duplication - the only script here that needs network access |
 | `data/carrier_six_genomes.tsv` | The six-genome measurement behind the carrier table: covered bases and summed depth per species per sample |
 | `data/assembly_alignment.tsv`, `data/assembly_junction_depth.tsv` | The contig that carries both the *Klebsiella* chromosome and the island, and the read depth across their junction |
+| `data/kleborate/` | The Kleborate typing of the one assembly-confirmed *K. pneumoniae* carrier, both runs, plus which contig went in which bin and why |
+| `data/clb_in_six_genomes.tsv` | Which of the six reference genomes carry a *clb* island of their own, by exact 40-mer sharing - needed to read the contig assignment |
 | `data/rarefy_check_hist.tsv` | Depth histograms from 5 runs where the FASTQ really was subsampled and remapped |
-| `code/make_table.py`, `code/make_dup_table.py` | How `data/` was generated from BAM depth |
+| `code/make_*.py` | How everything in `data/` was generated from the working tree; six generators, listed in [code/README.md](code/README.md) |
 | `pipeline/` | The mapping and download scripts, for anyone starting from FASTQ |
 
 ## Data sources

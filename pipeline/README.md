@@ -18,9 +18,19 @@ bash on WSL/Linux. Comments and log output are in Japanese.
 | `asm_genomes.sh` | Map one sample to six complete Enterobacteriaceae genomes in a **single combined index**, so reads compete and MAPQ 20 removes cross-species bleed |
 | `asm_measure.sh` | Map the same read set to the island and the marker sets, for the depth ratios |
 | `asm_report.py` | Print the per-species depth / breadth / ratio table used in RESULTS.md |
+| `asm_assemble.sh` | Assemble one sample with megahit, find the contigs carrying the island, and align them to the six genomes - the step that answers "whose island is it" rather than "not *E. coli*'s" |
+| `asm_junction.sh` | Remap the reads to the island-bearing contig and count the evidence spanning the chromosome/island join, which is what rules out an assembler chimera. Produces `../data/assembly_junction_depth.tsv` |
+| `asm_kleborate.sh` | Bin the contigs by species and run Kleborate (3.2.4, `-p kpsc`) on the *K. pneumoniae* bin. Its header records two earlier attempts that failed and why |
+| `asm_kleborate_plus.sh` | Add the island-bearing contigs to that bin and run Kleborate again. **Read this one before quoting the typing**: the ICEKp10 call comes only from here, and the header says why the addition was forced by the reference set and what it therefore cannot establish. See [../CORRECTIONS.md](../CORRECTIONS.md) item 16 |
 
 ## Conventions worth knowing before you reuse these
 
+- **The reference set decides what the species assignment *can* say.** Of the six
+  genomes, only *E. coli* IHE3034 and *C. koseri* BAA-895 carry a *clb* island;
+  *K. pneumoniae* HS11286 shares 0.11% of the island's 40-mers and has none of its 18
+  genes. So a contig made of *clb* can never be assigned to *Klebsiella* by this
+  index, however much *Klebsiella* is in the sample. `../data/clb_in_six_genomes.tsv`
+  records this for all six.
 - **MAPQ 20 everywhere.** Lowering it lets the ~1,290 bp duplication back in and
   inflates breadth; raising it costs real coverage.
 - **Reads, not fragments.** Mates are passed independently with `-U`, so all counts

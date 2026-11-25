@@ -145,12 +145,25 @@ breadth is given because a species with breadth below ~0.1 is not really present
 | cancer_ERR1018282 | CRC | 3.0 | 3.5 (0.84) | **0.85** | 109.4 (0.89) | 0.03 | *E. coli* - **despite 109x Kp** |
 | cancer_ERR1018224 | CRC | 5.7 | 20.3 (0.89) | 0.28 | 0.005 (0.004) | - | *E. coli* by exclusion (nothing else present) |
 | n_ERR1018245 | control | 3.9 | 27.6 (0.95) | 0.14 | 1.09 (0.59) | 3.57 | *E. coli* by exclusion (Kp too shallow) |
-| **cancer_ERR1018186** | **CRC** | 13.5 | 0.41 (0.31) | **33** | 10.3 (0.88) | 1.30 | ***K. pneumoniae*, assembly-confirmed** ST23/K1/ICEKp10/*clb* |
+| **cancer_ERR1018186** | **CRC** | 13.5 | 0.41 (0.31) | **33** | 10.3 (0.88) | 1.30 | ***K. pneumoniae*, assembly-confirmed** ST23/K1 (automatic bin); ICEKp10 and a complete *clb* 2 only with the island contigs added - see [CORRECTIONS](CORRECTIONS.md) item 16 |
 | **n_ERR1018237** | **control** | 1.7 | **64.7 (0.81)** | **0.03** | 2.04 (0.76) | **0.84** | ***E. coli* cannot explain it** |
 | n_ERR1018240 | control | 2.7 | 3.5 (0.72) | 0.76 | 2.74 (0.83) | 0.97 | **undetermined - both fit** |
 | n_ERR1018238 | control | 2.5 | 8.3 (0.79) | 0.30 | 8.34 (0.91) | 0.30 | undetermined |
 | cancer_ERR1018219 | CRC | 1.6 | 11.5 (0.91) | 0.14 | 7.82 (0.90) | 0.20 | undetermined |
 | n_ERR1018236 | control | 2.5 | 11.8 (0.78) | 0.22 | 2.06 (0.76) | 1.23 | undetermined |
+
+**The other four genomes were checked and none of them is ever a better fit.** The
+table shows only *E. coli* and *K. pneumoniae* because those two are the only
+candidates that ever come close, but all six were measured in the same index. In no
+sample does any of the other four have a genome breadth above 0.3 **and** a ratio
+closer to 1 than the species reported here; the closest any of them comes is
+*C. freundii* CFNIH1 in `cancer_ERR1018198`, breadth 0.496 at ratio 1.37 against
+*E. coli*'s 0.91. *C. koseri* BAA-895 needs a separate note: it **carries a *clb*
+island of its own** (94.88% of this reference's 40-mers, all 18 genes), and its genome
+breadth never exceeds 0.028 in any sample - about the 1.1% of its genome that the
+island accounts for. Its apparent presence is the island, not the organism.
+`python3 code/verify_extra.py` prints all six per sample, and
+`data/clb_in_six_genomes.tsv` holds the island content of each reference genome.
 
 **Four of the 14 cannot be assigned a carrier species at all**, even with six complete
 genomes competing in one index. This is the part of the carrier analysis that we did
