@@ -18,8 +18,9 @@ duplicated region is always lost.
 **Root cause.** We took the highest value we had seen in a handful of deep samples and
 promoted it to a derived constant. It was an observation, not a derivation.
 
-**What is actually derivable.** If both copies of the 1,248 bp duplication are lost
-entirely, breadth is `(49455 - 2496) / 49455 = 0.9495`. Reads that happen to span a
+**What is actually derivable.** If both copies of the duplication are lost entirely,
+breadth is `(49455 - 2574) / 49455 = 0.9480`. (This paragraph originally said 1,248 bp
+and 0.9495; the repeat was later measured at 1,287 bp - see item 9.) Reads that happen to span a
 position where the two copies differ (they are 99.840% identical, so 0.16% of
 positions) can still be placed, which lifts breadth above that figure by a
 sample-dependent amount. **The ceiling is not a fixed number.** The defensible
@@ -178,6 +179,62 @@ to abundance-based attribution - the case where the pull of abundance is stronge
 (109x) and still wrong. Our *Klebsiella* count for CN-CRC is unchanged at 2, because
 the sample we removed from the *Klebsiella* side was never counted there in the final
 tally; what changed is that it is now positively assigned rather than left leaning.
+
+---
+
+## 9. "None of these four pitfalls is documented anywhere"
+
+**What we said**, in the README and at the head of PITFALLS.md: that the four failure
+modes were ones we could not find documented in the literature. **We published that
+claim before checking it properly.**
+
+**Why it was wrong.** A targeted literature check done after publication found
+published antecedents for three of the four:
+
+- **Item 1, the duplication.** Auvray et al. 2021 (*Microb Genom* 7:000579) report
+  twelve strains with a 5,651 bp deletion fusing *clbJ* and *clbK*, and state it
+  "presumably resulted from recombination between two copies of a 1480 bp homologous
+  sequence located in *clbJ* and *clbK*". That is the repeat. Our own measurement of
+  the spacing between the two copies is 5,653 bp, within 2 bp of their deletion, so it
+  is unmistakably the same feature. They say nothing about read mapping, and their one
+  caution is about assembly, so the mapping consequence survives as ours - but the
+  existence of the repeat was never ours to claim.
+- **Item 2, read counts are not abundance.** Breadth-based presence calling is
+  standard in metagenomics methods work, and Blanco-Miguez et al. 2023 (*mSystems*
+  8:e00079-23) state of this very reference that "there are genes not belonging to the
+  island distributed in the inner part of the cluster".
+- **Item 4, depth-limited breadth.** That shallow sequencing cannot support gene
+  presence/absence calls, and that sequencing effort confounded with treatment group
+  produces false positives, are both established, with rarefaction the standard remedy.
+
+Only item 3, the ~1.9x density-ratio offset, turned up nothing - and even there the
+general class of bias (mappability, average genome size) is well known.
+
+**Root cause.** We searched the *pks*-and-colorectal-cancer literature, found the
+pitfalls absent from it, and generalised that to "absent from the literature". The
+antecedents are in the methods and bacterial-genomics literature, which we had not
+searched. A claim of novelty is a claim about the whole literature and needs a search
+shaped like one.
+
+**What replaced it.** PITFALLS.md now opens with a table of what was already known,
+quotes both papers, and states the narrower claim: these are places where known
+methodological facts are not applied to *pks* detection. The check that produced this
+correction was itself targeted rather than systematic - six searches and two full-text
+reads - so a further item may yet prove to be published.
+
+**A second error found by the same check.** Measuring the repeat properly to compare
+with Auvray et al. showed our own figure was short. We had **1,248 bp**
+(16,066-17,313); the repeat extends to **1,287 bp** (16,066-17,352) by exact 30-mer
+matching, at 99.845% identity, and to 1,292 bp at >=98% windowed identity. An
+exhaustive 30-mer scan confirms no further indel-shifted continuation: of 1,206
+sequences occurring more than once in the island, 1,198 lie at a spacing of exactly
+5,653 bp and no other spacing between 5,000 and 6,500 bp exists. The derived
+"everything lost" breadth therefore becomes `(49455 - 2574) / 49455 = 0.9480`, not
+0.9495 as stated in item 1 of this file. `data/missing_split.tsv` was regenerated with
+the corrected interval. **The measured loss is unchanged** at 1,920-2,140 bp with 11
+of 13 deep samples having nothing missing outside the repeat, because the bases that
+actually go uncovered lie in the interior of the repeat, bounded by read length - so
+widening the interval by 39 bp at each end moves nothing.
 
 ---
 

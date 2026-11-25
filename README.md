@@ -29,13 +29,22 @@ A result that does not reach significance at 3,741 samples will not reach it at 
 The negative result is a second, independent confirmation of something already
 published, so its novelty is modest. The part that may save other people time is
 [PITFALLS.md](PITFALLS.md) - four ways that *pks* detection from shotgun stool
-metagenomes goes wrong, none of which we found documented anywhere:
+metagenomes goes wrong.
 
-1. **The reference contains a 1,248 bp duplication, so breadth of coverage can never
-   reach 1.0.** In AM229678.1 the same 1,248 bp appears at 16,066-17,313 (inside
-   *clbK*) and 21,719-22,966 (inside *clbJ*), 99.84% identical. Reads there are
+An earlier version of this README claimed none of the four was documented anywhere.
+**That was wrong.** Items 1, 2 and 4 all have published antecedents, which
+[PITFALLS.md](PITFALLS.md) now names and quotes; see
+[CORRECTIONS.md](CORRECTIONS.md) item 9. The accurate claim is that these are places
+where known methodological facts are **not being applied** to *pks* detection, plus
+one measurement (item 3) we could not find reported.
+
+1. **The reference contains a ~1,290 bp duplication, so breadth of coverage can never
+   reach 1.0.** In AM229678.1 the same 1,287 bp appears at 16,066-17,352 (inside
+   *clbK*) and 21,719-23,005 (inside *clbJ*), 99.845% identical. Reads there are
    multi-mapping and are discarded at MAPQ 20. The observed ceiling is **~0.95**
    (maximum seen in 397 samples: 0.9607). A sample at 0.95 is not a partial island.
+   The repeat itself was published by Auvray et al. 2021 (as "1480 bp", which we
+   cannot reproduce); its effect on read mapping is what we add.
 2. **Raw read counts against the island are not a measure of island abundance.**
    The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence.
    Island-negative samples still accumulate reads there (median background

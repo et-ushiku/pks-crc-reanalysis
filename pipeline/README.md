@@ -21,7 +21,7 @@ bash on WSL/Linux. Comments and log output are in Japanese.
 
 ## Conventions worth knowing before you reuse these
 
-- **MAPQ 20 everywhere.** Lowering it lets the 1,248 bp duplication back in and
+- **MAPQ 20 everywhere.** Lowering it lets the ~1,290 bp duplication back in and
   inflates breadth; raising it costs real coverage.
 - **Reads, not fragments.** Mates are passed independently with `-U`, so all counts
   are reads. Published read counts in the source papers are often fragment counts, a
