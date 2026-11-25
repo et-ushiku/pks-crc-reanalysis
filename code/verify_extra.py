@@ -227,11 +227,79 @@ def regression(rows):
     print("   with depth itself significant at P = 0.010.")
 
 
+# ---------------------------------------------------------------- 4. carrier
+def carriers():
+    print()
+    print("=" * 70)
+    print("4. The carrier table: 14 positives against six complete genomes")
+    print("=" * 70)
+    print("   ratio = island mean depth / that species' genome mean depth,")
+    print("   both from the same read set at MAPQ 20.")
+    print()
+    rows = load("carrier_six_genomes.tsv")
+    by = {}
+    for r in rows:
+        by.setdefault(r["sample"], {})[r["target"]] = r
+    print("   %-22s %-8s %8s | %9s %6s %7s | %9s %6s %9s"
+          % ("sample", "group", "island", "E.coli", "bread", "ratio",
+             "K.pneu", "bread", "ratio"))
+    print("   " + "-" * 94)
+
+    def stat(d):
+        bp = float(d["target_bp"])
+        return int(d["sum_depth"]) / bp, int(d["covered_bp"]) / bp
+
+    out = []
+    for s in by:
+        isl, _ = stat(by[s]["pks_island_clb_genes"])
+        ed, eb = stat(by[s]["Ecoli_IHE3034"])
+        kd, kb = stat(by[s]["Kpneumoniae_HS11286"])
+        out.append((isl / ed if ed > 0.01 else float("inf"), s, isl, ed, eb, kd, kb))
+    for er, s, isl, ed, eb, kd, kb in sorted(out):
+        kr = ("%9.2f" % (isl / kd)) if kd > 0.01 else "        -"
+        print("   %-22s %-8s %8.2f | %9.2f %6.3f %7.2f | %9.2f %6.3f %s"
+              % (s, "CRC" if s.startswith("cancer_") else "control",
+                 isl, ed, eb, er, kd, kb, kr))
+    print()
+    print("   Compare with the table in RESULTS.md. Every species measured is in")
+    print("   data/carrier_six_genomes.tsv, including the four not shown here.")
+
+
+# --------------------------------------------------------------- 5. assembly
+def assembly():
+    print()
+    print("=" * 70)
+    print("5. The one carrier confirmed by assembly, and whether it is a chimera")
+    print("=" * 70)
+    for r in load("assembly_alignment.tsv"):
+        print("   %s %s-%s (%s) -> %-22s %s-%s   %s/%s matched   [%s]"
+              % (r["contig"], r["contig_start"], r["contig_end"], r["strand"],
+                 r["target"], r["target_start"], r["target_end"],
+                 r["matches"], r["aln_len"], r["method"]))
+    print()
+    print("   One contig of 386,079 bp: K. pneumoniae chromosome up to ~354,276,")
+    print("   then the pks island to the end. They are contiguous, not two contigs.")
+    print()
+    d = load("assembly_junction_depth.tsv")
+    pos = [int(r["position"]) for r in d]
+    dep = [int(r["depth"]) for r in d]
+    zero = sum(1 for v in dep if v == 0)
+    print("   Read depth across %d-%d (%d bases spanning the junction):"
+          % (min(pos), max(pos), len(dep)))
+    print("     minimum %d   median %d   maximum %d   bases at zero depth: %d"
+          % (min(dep), sorted(dep)[len(dep) // 2], max(dep), zero))
+    if zero == 0:
+        print("   No gap in coverage, so the join is supported by reads rather than")
+        print("   inferred by the assembler. That is what rules out a chimera.")
+
+
 def main():
     rows = load("per_sample.tsv")
     depth_difference(rows)
     density_ratio(rows)
     regression(rows)
+    carriers()
+    assembly()
 
 
 if __name__ == "__main__":

@@ -414,6 +414,49 @@ and a half orders of magnitude away - do not move.
 
 ---
 
+## 15. The front-page finding was not reproducible from this repository either
+
+Asked whether anything else was unverifiable, we swept the documents by what data each
+claim depends on rather than by reading them. **The carrier analysis - the finding we
+had just promoted to the front page - was not in the shipped data at all.** Neither
+was the assembly confirmation that is the strongest single observation in the project.
+Both are now shipped; both are tiny.
+
+| Claim | Depended on | Now in |
+|---|---|---|
+| The 14-sample carrier table | `*.g6.depth.tsv`, 14 KB, not shipped | `data/carrier_six_genomes.tsv` (6 KB, 98 rows) |
+| "The island and the *Klebsiella* chromosome on a single contig" | a 386 kb assembly contig, not shipped | `data/assembly_alignment.tsv` (4 rows) |
+| That the contig is not a chimera | read depth across the junction, not shipped | `data/assembly_junction_depth.tsv` (5,001 rows) |
+| The 1,287 bp repeat at 99.845% | AM229678.1, which we do not redistribute | `code/verify_repeat.py`, which fetches it |
+
+The contig is 386,079 bp. Positions 25-354,276 align to the *K. pneumoniae* HS11286
+chromosome; positions 354,259-386,079 match AM229678.1 exactly over 31,389 50-mers.
+Read depth across the junction has a minimum of 12 and **no base at zero**, which is
+what distinguishes a real join from an assembler's mistake. None of that was checkable
+by a reader until now.
+
+**Root cause, and it is the same one as item 13.** We shipped what the *primary*
+analysis needed - the depth histograms - and assumed that covered the repository's
+obligations. Every subsequent finding was written up from files that stayed on one
+laptop. The check that would have caught it is not "are the numbers right" but "for
+each claim, which shipped file would a reader open", and we ran it only when asked.
+
+**What is still not verifiable from this repository**, listed so it is not discovered
+a fourth time:
+
+- **The *Klebsiella* strain typing** of `cancer_ERR1018186` (ST23/K1/ICEKp10) comes
+  from Kleborate output that is not shipped. The contig evidence above does not depend
+  on it.
+- **The marker-index constants** (96,300 bp over 122 fragments for *E. coli*;
+  `PER_PCT = 313`) are stated in `pipeline/entero_ref.py` but reproducing them means
+  rebuilding the index.
+- **The correlations read off Nooij et al.'s Supplementary Figure 1** were read from a
+  published image, not from their data, and PITFALLS.md says so where they appear.
+- **Everything quoted from a paper** is verifiable only by reading that paper; the
+  DOIs and PMC identifiers are given.
+
+---
+
 ## What did not change
 
 No pre-specified threshold was altered at any point after results were seen:

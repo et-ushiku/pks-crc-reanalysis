@@ -204,7 +204,7 @@ the 9.
 | *E. coli*, ratio 0.85-1.03 with no competing species | 4 | `cancer_ERR1018213`, `cancer_ERR1018229`, `cancer_ERR1018307`, `n_ERR1018246` |
 | *E. coli*, despite an abundant *Klebsiella* | 2 | `cancer_ERR1018198`, `cancer_ERR1018282` |
 | *E. coli* by exclusion, minority of cells | 2 | `cancer_ERR1018224`, `n_ERR1018245` |
-| ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) |
+| ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) - contig `k119_45171`, 386,079 bp: *Klebsiella* chromosome to ~354,276 then the island to the end, with read depth never falling below 12 across the junction. See `data/assembly_alignment.tsv` and `python3 code/verify_extra.py` |
 | ***K. pneumoniae***, *E. coli* excluded by coverage | 2 | `n_ERR1018237` (CN control), `n_CCMD39882286ST` (DE control) |
 | **Undetermined** (six-genome subset only) | 4 | `cancer_ERR1018219`, `n_ERR1018236`, `n_ERR1018238`, `n_ERR1018240` |
 | *E. coli* by marker ratio, DE-CRC (R 1.43-2.12, i.e. ~0.75-1.11 after the ~1.9x offset) | 8 | the other 8 DE-CRC positives |

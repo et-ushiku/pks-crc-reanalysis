@@ -133,7 +133,9 @@ E[覆い] = 平均_i [ 1 - (1-f)^d_i ]
 python3 code/analyse.py          # 標準ライブラリだけ。scipy 不要。1秒かからない
 python3 code/verify_rarefy.py    # 計算で間引いた値と、実際に fastq を間引いて
                                  # 貼り直した値を突き合わせる（2 検体・5 回）
-python3 code/verify_extra.py     # 以前は検算できなかった 3 つの数字を計算し直す
+python3 code/verify_extra.py     # 以前は検算できなかったものを計算し直す
+                                 # （深さの差・比のずれ・回帰・担い手・接合部）
+python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要ネットワーク）
 ```
 
 これで `data/depth_hist.tsv` から覆いを作り直し、保存してある値と照合し、全検体を
@@ -160,7 +162,10 @@ python3 code/verify_extra.py     # 以前は検算できなかった 3 つの数
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
-| `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰 — 以前は検算できなかった 3 つを計算し直す |
+| `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部を計算し直す |
+| `code/verify_repeat.py` | AM229678.1 を ENA から取って重複を測り直す。**唯一ネットワークが要る**スクリプト |
+| `data/carrier_six_genomes.tsv` | 担い手の表の元データ。検体ごと・種ごとの覆われた塩基数と深さの総和 |
+| `data/assembly_alignment.tsv`、`data/assembly_junction_depth.tsv` | *Klebsiella* の染色体と島を両方載せたコンティグと、その接合部の読み取りの深さ |
 | `data/rarefy_check_hist.tsv` | 実際に fastq を間引いて貼り直した 5 回分の深さの度数分布 |
 | `pipeline/` | fastq から始める人向けの、取得と貼り付けのスクリプト |
 
