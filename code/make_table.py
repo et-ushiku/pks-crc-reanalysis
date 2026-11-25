@@ -195,8 +195,9 @@ def main():
     fh_h = open(outdir + "/depth_hist.tsv", "w", encoding="utf-8", newline="")
     fh_h.write("sample\tgene\tdepth\tbases\n")
     fh_s = open(outdir + "/per_sample.tsv", "w", encoding="utf-8", newline="")
-    fh_s.write("cohort\tstudy\tsample\tgroup\ttotal_reads\tisland_breadth"
-               "\tgenes_called\tcall\tecoli_pct\tkpneumoniae_pct\n")
+    fh_s.write("cohort\tstudy\tsample\tgroup\ttotal_reads\tisland_reads"
+               "\tisland_breadth\tgenes_called\tcall\tecoli_pct"
+               "\tkpneumoniae_pct\n")
     n = 0
     for coh, dirs in COHORTS.items():
         for d in dirs:
@@ -205,15 +206,17 @@ def main():
                 h = hist_by_gene(f, regions)
                 br, ng, cl = call_from(h, regions, 1.0)
                 N = total_reads(d + "/" + s + ".bowtie2.log") or extra.get(s)
+                # 参照配列に貼り付いた本数（MAPQ で絞る前）。PITFALLS 項目 2 用
+                nr = aligned(d + "/" + s + ".bowtie2.log")
                 eco = ecoli_of(coh, s, zref)
                 kp = kp_of(coh, s)
                 for nm, a, b in regions:
                     for dep in sorted(h.get(nm, {})):
                         fh_h.write("%s\t%s\t%d\t%d\n" % (s, nm, dep, h[nm][dep]))
-                fh_s.write("%s\t%s\t%s\t%s\t%s\t%.6f\t%d\t%s\t%s\t%s\n"
+                fh_s.write("%s\t%s\t%s\t%s\t%s\t%d\t%.6f\t%d\t%s\t%s\t%s\n"
                            % (coh, STUDY[coh], s,
                               "CRC" if s.startswith("cancer_") else "control",
-                              N if N else "NA", br, ng, cl,
+                              N if N else "NA", nr, br, ng, cl,
                               ("%.6f" % eco) if eco is not None else "NA",
                               ("%.6f" % kp) if kp is not None else "NA"))
                 n += 1

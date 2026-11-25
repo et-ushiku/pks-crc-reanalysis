@@ -109,13 +109,14 @@ backwards twice. What is left is a set of measurements:
    0.9982 for the other 16. The repeat was published by Auvray et al. 2021 as
    "1480 bp", which we cannot reproduce at any identity threshold.
 2. **The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence**, so
-   island-negative samples still accumulate reads on it: median background
-   *pks*/*E. coli* read ratio 0.012 across 82 such samples, at breadth ~0.004.
+   island-negative samples still accumulate reads on it. Across the **106** samples
+   with breadth below 0.1 and at least 50 reads mapped, the median is **260 reads**
+   (maximum 10,548) at a median breadth of 0.0018.
 3. **A marker-gene density ratio carries a ~1.9x systematic offset**, decomposed as
    1.115 x 1.14 x ~1.50. Usable for exclusion, not attribution. This is the only one
    of the four for which we found no published antecedent.
-4. **Breadth is depth-limited below ~10x island coverage**; 34 of 44 positive samples
-   sat below it. In one cohort the between-group depth difference is P = 1.5e-14, so
+4. **Breadth is depth-limited below ~10x island coverage**; 29 of the 42 positive
+   samples sat below it. In one cohort the between-group depth difference is P = 1.5e-14, so
    calling on raw data would find more carriers in the cancer group for a purely
    technical reason.
 
@@ -160,7 +161,7 @@ different seeds at the same depth, and **all five calls agree**. See
 | [PITFALLS.md](PITFALLS.md) | The four measurements above, what was already published about each, and a worked example in a published study |
 | [CORRECTIONS.md](CORRECTIONS.md) | Every claim we made and later had to withdraw, and why |
 | `data/depth_hist.tsv` | Per-sample, per-gene depth histograms - **the reproducible dataset** |
-| `data/per_sample.tsv` | 397 rows: breadth, genes called, call, read count, *E. coli* %, *K. pneumoniae* % (**NA where that species was never measured** - see CORRECTIONS.md item 7) |
+| `data/per_sample.tsv` | 397 rows: total reads, **reads mapped to the island reference**, breadth, genes called, call, *E. coli* %, *K. pneumoniae* % (**NA where that species was never measured** - see CORRECTIONS.md item 7) |
 | `data/missing_split.tsv` | Uncovered bases split inside/outside the duplication |
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |

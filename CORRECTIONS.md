@@ -34,9 +34,11 @@ sample in 397 exceeded 0.99.
 **What we said.** That for any sample with breadth >= 0.5, every uncovered base would
 fall inside the duplicated region.
 
-**Why it was wrong.** We checked all 44 positive samples. **Only 9 satisfied it.**
-Twenty-five samples had breadth below the 0.9495 figure while still passing the
->= 14/18 gene rule, which is impossible if the duplication is the only thing missing.
+**Why it was wrong.** We checked every positive sample. **Only 11 satisfied it.**
+Twenty-six had breadth below the derived ceiling while still passing the >= 14/18 gene
+rule, which is impossible if the duplication is the only thing missing. (The counts
+here were originally given as 9 and 25 out of 44 positives; the audit in item 13 found
+the correct figures to be 11 and 26 out of 42.)
 
 **Root cause.** Same as item 1: we generalised from the three or four deepest samples
 in hand, which happened to be the ones where it was true.
@@ -329,6 +331,49 @@ all**. Pooling them into one denominator without saying so implied a uniformity 
 does not exist. Both files now state the two methods separately, and the
 "4 unassignable" figure is reported against 14 rather than 23, because the other 9
 could not have produced it.
+
+---
+
+## 13. An audit of every checkable number found six more stale figures
+
+After item 12, we recomputed **every** quantity in these documents from `data/`
+rather than fixing the one that had been noticed. Six more were wrong, all of them
+stale values from earlier runs that were never recomputed when the tables were
+regenerated:
+
+| Claim | Published | Correct |
+|---|---|---|
+| Positive samples | 44 | **42** |
+| Positives below 10x island depth | 34 of 44 | **29 of 42** |
+| Positives whose uncovered bases lie only in the duplication (item 2 above) | 9 | **11** |
+| Positives below the derived ceiling despite >= 14 genes (item 2 above) | 25 | **26** |
+| Mean bases missing outside the duplication at 2-10x | 2,597 | **2,585** |
+| Island-negative samples with >= 50 reads on the reference | 82 | **106** |
+| Their median breadth | 0.0038 | **0.0018** |
+
+None of these changes a conclusion. The duplication still caps breadth, the background
+is if anything **larger** than we reported, and depth still limits most positive calls.
+But a repository that asks readers to check its numbers has to have numbers that
+survive being checked.
+
+**Root cause.** The data tables were regenerated three times - when the
+*K. pneumoniae* NA bug was fixed (item 7), when the duplication interval was corrected
+(item 9), and when `island_reads` was added here - and the prose was not recomputed
+against them. Each fix was verified not to change the primary result, which was true,
+and that was mistaken for verifying that it changed nothing.
+
+**A worse finding than any of the individual numbers.** Pitfall 2's figures were
+**not checkable from the repository at all.** They depend on how many reads mapped to
+the 55,140 bp reference, and that column was not in any shipped table - breadth and
+depth are computed over the gene intervals only, which is precisely the distinction
+the pitfall is about. A reader could not have caught this, and neither could we until
+we tried. `data/per_sample.tsv` now carries an `island_reads` column, and
+`code/make_table.py` documents what it is.
+
+**What we did not do.** Three figures remain unverifiable from the shipped data
+because the inputs are not here: the ~1.9x ratio decomposition, the DE-CRC
+between-group depth difference (P = 1.5e-14), and the earlier regression whose odds
+ratio moved from 3.11 to 1.31. They are flagged in place rather than removed.
 
 ---
 

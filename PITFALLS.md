@@ -137,16 +137,20 @@ The AM229678.1 reference is **55,140 bp**, but the 18 *clb* genes cover only
 **49,455 bp**. The remaining **5,685 bp** is intergenic sequence and flanking
 backbone, which is *not* island-specific.
 
-Reads from ordinary, island-free *E. coli* land on that 5,685 bp. In 82 samples that
-were island-negative (breadth < 0.1) yet still had >= 50 reads mapped to the
-reference:
+Reads from ordinary, island-free *E. coli* land on that 5,685 bp. Among the **106
+samples** that were island-negative (breadth < 0.1) yet still had at least 50 reads
+mapped to the reference:
 
 ```
-median breadth over the clb genes:        0.0038
-median ratio of pks reads to E. coli reads: 0.0116
+median breadth over the clb genes:        0.0018
+median reads mapped to the reference:       260
+maximum reads mapped to the reference:   10,548
 ```
 
-So the read count is non-zero while the island is absent.
+So the read count is not merely non-zero: it reaches four figures in samples where the
+island is absent. Both columns are in `data/per_sample.tsv` (`island_reads` and
+`island_breadth`), so this is checkable - it was not, until this audit, because the
+read counts were not shipped. See [CORRECTIONS.md](CORRECTIONS.md) item 13.
 
 ### This one is not new, and that is the problem
 
@@ -166,8 +170,8 @@ detected individually, rather than by counting reads over the cluster.
 **The pitfall is therefore not that this is unknown. It is that *pks* metagenomics
 papers still report island abundance as reads or RPKM over the cluster**, which
 inherits exactly the background measured above. What this repository adds is the size
-of that background for this reference: 5,685 bp of non-gene sequence, and a median
-`pks`/*E. coli* read ratio of 0.0116 in samples that have no island.
+of that background for this reference: 5,685 bp of non-gene sequence, and a median of
+260 reads - up to 10,548 - landing on it in samples that have no island.
 
 ### Consequences
 
@@ -225,11 +229,11 @@ Breadth saturates only once the island is covered several times over. Below that
 
 ```
 island depth >= 10x   n =  13   11 of 13 have zero missing bases outside the duplication
-island depth 2-10x    n =  18   mean 2,597 bp missing outside the duplication
+island depth 2-10x    n =  18   mean 2,585 bp missing outside the duplication
 island depth <  2x    n = 366
 ```
 
-Only 13 of 397 samples are depth-saturated. 34 of 44 positive calls sat below 10x.
+Only 13 of 397 samples are depth-saturated. 29 of the 42 positive calls sat below 10x.
 
 ### Why this is dangerous
 
