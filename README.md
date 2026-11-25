@@ -40,23 +40,25 @@ descending order of how well they survived checking against the literature.
 
 This is the part we would point a reader at first.
 
-All 14 *pks*-positive CN-CRC samples were mapped to **six complete
+Carriers were examined in **23 positive samples** across two cohorts, by two methods
+of unequal strength. All 14 CN-CRC positives were mapped to **six complete
 Enterobacteriaceae genomes in a single competitive index** at MAPQ 20 - *E. coli*
 IHE3034, *K. pneumoniae* HS11286, *C. freundii* CFNIH1, *C. koseri* BAA-895,
 *E. cloacae* ATCC13047 and *K. aerogenes* KCTC2190 - so that reads from the genomes
-compete and ambiguous ones are dropped. The readout is island depth divided by each
-species' genome depth, from the same read set. Full table in
-[RESULTS.md](RESULTS.md).
+compete and ambiguous ones are dropped; the readout is island depth divided by each
+species' genome depth, from the same read set. The 9 DE-CRC positives were assessed
+only by marker-gene density ratio, which can exclude a species but cannot establish
+one. Full tables in [RESULTS.md](RESULTS.md).
 
 | Finding | |
 |---|---|
-| **Cannot be assigned to any species** | **4 of 14.** *E. coli* and *K. pneumoniae* are both abundant and both ratios fit. In one control, *E. coli* sits at ratio 0.76 and Kp at 0.97, both with genome breadth above 0.7. |
-| Better explained by *K. pneumoniae* than *E. coli* | 3 of 15 across both cohorts examined - and **two of the three are controls**, which is the opposite of what a disease association predicts |
+| **Cannot be assigned to any species** | **4 of the 14** measured against six genomes. *E. coli* and *K. pneumoniae* are both abundant and both ratios fit. In one control, *E. coli* sits at ratio 0.76 and Kp at 0.97, both with genome breadth above 0.7. The weaker marker-ratio method used on the other 9 cannot return this verdict at all, so it has no counterpart there. |
+| Better explained by *K. pneumoniae* than *E. coli* | **3 of 23** (13%) - and **two of the three are controls**, which is the opposite of what a disease association predicts |
 | Confirmed by assembly | 1, with the island and the *Klebsiella* chromosome on a single contig |
 | **Abundance is not carriage** | Two samples carry *K. pneumoniae* at 16.7x and **109x** genome depth (breadth > 0.88) where the island nonetheless tracks *E. coli* |
 
-**Species attribution of this island from stool reads fails outright in roughly a
-quarter to a third of positive samples, and it fails precisely where two
+**Species attribution of this island from stool reads failed outright in 4 of the 14
+samples where we could attempt it properly (29%), and it failed precisely where two
 Enterobacteriaceae are co-abundant.** We have not found a paper that reports what
 fraction of its positives it could not assign.
 
@@ -85,10 +87,8 @@ Quotations and sources for all three are in [PITFALLS.md](PITFALLS.md).
 The four cohorts are roughly 2.5 TB of FASTQ and none of it is needed, because every
 call is a function of the per-gene depth histograms. The substitution is exact by
 linearity of expectation, and it is also checked against FASTQ that really was
-subsampled and remapped: largest gap **0.0211** over five runs, smaller than the
-**0.0182** spread between seeds at the same depth, with **all five calls agreeing**.
-See the next section to run it, and [METHODS.md](METHODS.md) for the derivation and
-what the check does not settle.
+subsampled and remapped. Details and commands in
+[the next section](#reproducing-the-result-without-the-raw-data).
 
 ### 3. Four measurements on this reference, mostly with published antecedents
 

@@ -187,8 +187,13 @@ will get both of these samples wrong. We made exactly that mistake with
 
 ### Summary of carriers
 
-Across both cohorts where carriers were examined, of 14 CN-CRC positives and 1 DE-CRC
-positive:
+Carriers were examined in **23 positive samples across two cohorts**: all 14 CN-CRC
+positives, against six complete genomes in one competitive index, and all 9 DE-CRC
+positives, by marker-gene density ratio only. **The two methods are not equivalent.**
+The ratio can exclude a species ("R >> 1, so it cannot account for this") but cannot
+establish one, and it cannot produce the "undetermined" verdict at all - so the
+4-of-14 figure below belongs to the six-genome subset and has no counterpart among
+the 9.
 
 | Attribution | n | Samples |
 |---|---|---|
@@ -197,7 +202,8 @@ positive:
 | *E. coli* by exclusion, minority of cells | 2 | `cancer_ERR1018224`, `n_ERR1018245` |
 | ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) |
 | ***K. pneumoniae***, *E. coli* excluded by coverage | 2 | `n_ERR1018237` (CN control), `n_CCMD39882286ST` (DE control) |
-| **Undetermined** | 4 | `cancer_ERR1018219`, `n_ERR1018236`, `n_ERR1018238`, `n_ERR1018240` |
+| **Undetermined** (six-genome subset only) | 4 | `cancer_ERR1018219`, `n_ERR1018236`, `n_ERR1018238`, `n_ERR1018240` |
+| *E. coli* by marker ratio, DE-CRC (R 1.37-2.01, i.e. 0.72-1.06 after the ~1.9x offset) | 8 | the other 8 DE-CRC positives |
 
 - **Only one sample is confirmed by assembly**: `cancer_ERR1018186`, where the island
   and the *Klebsiella* chromosome appear on a single contig. The other two *Klebsiella*
@@ -205,7 +211,7 @@ positive:
   prove it. Those FASTQ files were deleted after measurement, so the linkage check has
   not been run on them.
 - **Two of the three *Klebsiella* attributions are controls**, which is the opposite of
-  what a disease association would predict.
+  what a disease association would predict. Three of 23 positives is 13%.
 - **Four of 14 are undetermined.** Species attribution of the island from stool
   metagenomes fails outright in roughly a quarter to a third of positive samples, and
   it fails precisely where two Enterobacteriaceae are co-abundant. Any paper that

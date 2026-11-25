@@ -504,10 +504,11 @@ cannot tell which it was: no threshold is given and the data are not shown.
 
 It matters because of what it forecloses. If no *Klebsiella* is detected, no *pks*
 island can be attributed to *Klebsiella*, and attribution defaults to *E. coli* by
-construction. Our own six-genome analysis in [RESULTS.md](RESULTS.md) finds the island
-better explained by *K. pneumoniae* than by *E. coli* in 3 of 15 positives, and finds
-4 of 14 impossible to assign at all - which cannot happen in a pipeline where the
-competing species is absent by definition.
+construction. Across the 23 positives where we looked ([RESULTS.md](RESULTS.md)), the
+island is better explained by *K. pneumoniae* than by *E. coli* in 3, and among the 14
+of those measured against six competing genomes, 4 cannot be assigned to any species
+at all - neither verdict is reachable in a pipeline where the competing species is
+absent by definition.
 
 ---
 

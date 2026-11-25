@@ -301,6 +301,37 @@ own method's failure mode must be everyone's.
 
 ---
 
+## 12. The carrier analysis was reported against the wrong denominator
+
+**What we said**, in the summary table of RESULTS.md and then on the front page of the
+README: that carriers were examined "of 14 CN-CRC positives and 1 DE-CRC positive",
+and that 3 samples of **15** were better explained by *K. pneumoniae* than by
+*E. coli*.
+
+**Why it was wrong.** DE-CRC has **9** positives, not 1, and all 9 were examined - the
+DE-CRC section of the same file says so in its own heading ("DE-CRC, all 9 positives")
+and reports that 8 of them fit *E. coli*. Only the one exception was carried into the
+summary. The correct denominator is **23**.
+
+**Effect.** Three *Klebsiella* attributions out of 15 is 20%; out of 23 it is **13%**.
+We published the larger figure. No individual sample's attribution changes.
+
+**Root cause.** The summary table was written while finishing the CN-CRC work and
+counted the DE-CRC cohort by the one sample that was interesting rather than by the
+samples that were examined. The error then propagated to the README when the carrier
+analysis was promoted to the front page.
+
+**A second thing this exposed.** The two cohorts were not examined by the same method:
+the 14 CN-CRC samples went through the six-genome competitive index, while the 9
+DE-CRC samples were assessed only by marker-gene density ratio, which can exclude a
+species but cannot establish one and **cannot return the "undetermined" verdict at
+all**. Pooling them into one denominator without saying so implied a uniformity that
+does not exist. Both files now state the two methods separately, and the
+"4 unassignable" figure is reported against 14 rather than 23, because the other 9
+could not have produced it.
+
+---
+
 ## What did not change
 
 No pre-specified threshold was altered at any point after results were seen:
