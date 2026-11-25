@@ -208,6 +208,19 @@ automatic bin, while ICEKp10 and a complete *clb* 2 appear only in the second ru
 A typing from a hand-assembled bin is not independent evidence of what the added
 contigs belong to - that evidence is step 4. See CORRECTIONS.md item 16.
 
+**Step 6, do the added contigs belong to that genome.** Alignments are split at the
+island boundary, where the boundary is set by exact 40-mer matches grouped into
+contiguous blocks - not first-hit-to-last-hit, which inflates a scatter of hits into a
+span. Taken alone this step is **negative**: `k119_70945`'s non-island portion matches
+*C. koseri* better than *K. pneumoniae* (0.928 against 0.818 of matched bases over
+aligned length - a PAF ratio that includes gaps, so usable for comparing species on
+one contig but not an identity), so similarity does not place it. What does place it is megahit's per-contig *k*-mer coverage depth compared
+with the bin's own: the bin averages 18.08, the island contigs sit at 18.01, 18.99 and
+19.83, the collapsed duplication at 36.00, and *C. koseri* is absent from the sample.
+That is coverage plus the absence of the alternative, not similarity, and it is
+weaker than step 4. `code/make_backbone_table.py`, checked by section 7 of
+`code/verify_extra.py`.
+
 ## Statistics
 
 - Per cohort: Fisher's exact test, two-sided (own implementation, `fisher()` in

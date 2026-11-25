@@ -7,7 +7,7 @@ Python 3, standard library only. No arguments needed unless shown.
 | Script | What it does |
 |---|---|
 | `analyse.py` | Reproduces the primary result: recomputes breadth from the depth histograms, rarefies to a common read count, applies the pre-specified gate, prints per-cohort tables and the Mantel-Haenszel meta-analysis |
-| `verify_extra.py` | Six checks that each used to be impossible from `data/` alone: the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, and the strain typing |
+| `verify_extra.py` | Seven checks that each used to be impossible from `data/` alone: the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `verify_rarefy.py` | Checks the analytic rarefying formula against actual subsampling, and that the disagreement is smaller than the seed-to-seed spread |
 
 ```
@@ -52,6 +52,7 @@ are visible rather than buried in the file.
 | `make_junction_table.py` | `data/assembly_alignment.tsv`, `data/assembly_junction_depth.tsv` |
 | `make_kleborate_table.py` | `data/kleborate/*` - the typing output of both runs, plus the contig assignment behind it |
 | `make_clb_in_genomes.py` | `data/clb_in_six_genomes.tsv` - which reference genomes carry a *clb* island of their own |
+| `make_backbone_table.py` | `data/kleborate/island_contig_backbone.tsv`, `data/kleborate/contig_depth.tsv` - each island contig's non-island portion and its coverage depth |
 
 `make_clb_in_genomes.py` is the exception to "will not run here": it needs only an
 island FASTA, `data/clb_genes.bed` and the six-genome FASTA, and does exact 40-mer

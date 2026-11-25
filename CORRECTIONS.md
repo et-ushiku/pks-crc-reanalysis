@@ -514,6 +514,66 @@ nor *clbK*.
 **What changed in the text:** RESULTS.md now says which run each part of the typing
 comes from, instead of running them together.
 
+### Amended one commit later: the similarity argument is worse, and a different one works
+
+The paragraph above said a typing from a hand-assembled bin "is not independent
+evidence that those contigs belong to this *Klebsiella* genome". That stands, and
+once we split the alignments at the island boundary it is **worse** than stated.
+
+Our own working notes from the time claimed the opposite - that with the island region
+excluded, `k119_70945`'s backbone "matches only *K. pneumoniae*, *C. koseri* zero".
+**That does not reproduce.** There are only two alignments for that contig, and
+separating island from backbone gives:
+
+| region of `k119_70945` | *C. koseri* BAA-895 | *K. pneumoniae* HS11286 |
+|---|---|---|
+| backbone (the 49.6 kb that is not island) | 46,008 / 49,568 = **0.928** | 37,315 / 45,623 = **0.818**, and only over 45.6 kb |
+
+Those are matched bases over aligned length from minimap2's PAF. **They include gaps
+and are not identities** - a contig at 99% identity can read as 0.81 this way, a
+mistake we made earlier in this project and recorded in `pipeline/asm_kleborate.sh`.
+They are used here only to compare the two species against each other on one contig.
+
+By similarity the backbone of that contig favours *C. koseri*, not *Klebsiella*. It
+behaves like an ICE-like element with homologues in both genera, which is exactly the
+kind of sequence whose species cannot be read off similarity. We had written down a
+number that said otherwise and did not recheck it before quoting the conclusion.
+
+**There is independent evidence, of a different kind, and we had not used it.**
+megahit reports a k-mer coverage depth per contig, and these are all from one sample:
+
+| contig | bp | depth | island content |
+|---|---|---|---|
+| the bin, length-weighted over 62 contigs | 5,082,743 | **18.08** | - |
+| `k119_45171` | 386,079 | **18.01** | 31,821 bp, *clbA*-*clbJ* end |
+| `k119_70945` | 63,927 | **18.99** | 14,343 bp, the *clbQ*-*clbL* end |
+| `k119_70596` | 4,643 | **19.83** | all island |
+| `k119_32464` | 1,248 | **36.00** | all island - **almost exactly twice**, which is what a collapsed two-copy repeat must be |
+| `k119_25170` | 4,341 | **8.87** | 137 bp - **does not fit, and is barely island at all** |
+
+The island-bearing contigs sit at the *Klebsiella* genome's own coverage depth; the
+collapsed duplication sits at double it, as a two-copy repeat has to; and *C. koseri*
+is not in this sample to be their source - its genome breadth is 0.014, which is
+itself mostly the *clb* island it carries. **The argument is coverage depth plus the
+absence of the alternative, not sequence similarity.** It is weaker than the single
+contig of item 15 and we are not presenting it as equivalent, but it is evidence, and
+it is now shipped: `data/kleborate/island_contig_backbone.tsv` and
+`data/kleborate/contig_depth.tsv`, recomputed by `python3 code/verify_extra.py`.
+
+Two things fall out of it that were not visible before:
+
+- **`k119_25170` should probably never have been in the island set.** Depth 8.87,
+  about half the genome's, and only 137 bp of exact island *k*-mers.
+- **`k119_25144` is not an island contig either**, though it was in the island FASTA
+  and in the automatic bin: 1,024 bp of island in four scattered blocks across 214 kb.
+
+**Root cause of this one.** We checked a published claim against a note we had written
+rather than against the data. The note's figure came from one hand-typed command with
+an ad hoc coordinate cut and no record of how it was computed. The first version of
+the table above had its own version of the same bug - taking the island's extent as
+first-hit-to-last-hit, which turns `k119_25144`'s four scattered blocks into "39,448
+bp of island" - and that is recorded in `code/make_backbone_table.py`.
+
 ### One thing found while checking this
 
 Kleborate's colibactin scheme types 15 loci and has **no *clbJ* or *clbK* column**.
@@ -524,10 +584,12 @@ PITFALLS.md item 1.
 
 ### What this says about the pattern
 
-Items 13, 15 and 16 are the same mistake three times. Each time, **a claim was correct
-in substance and wrong in what it attributed to the evidence we had.** Shipping the
-evidence is what exposed it. Items 15 and 16 were both found by someone asking for the
-underlying file, not by us re-reading the text.
+Items 13, 15 and 16 are the same mistake three times, and the amendment above is a
+fourth. Each time, **a claim was correct in substance and wrong in what it attributed
+to the evidence we had.** Shipping the evidence is what exposed it: items 15 and 16
+were both found by someone asking for the underlying file, and the amendment was found
+by generating the file that claim depended on rather than re-reading the note that
+asserted it.
 
 ---
 

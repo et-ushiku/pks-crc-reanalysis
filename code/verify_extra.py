@@ -363,6 +363,59 @@ def typing():
     print("   carries the chromosome and the island with no gap in read depth.")
 
 
+def backbone():
+    print()
+    print("=" * 70)
+    print("7. Do the island contigs belong to this Klebsiella genome?")
+    print("=" * 70)
+    rows = load("kleborate/island_contig_backbone.tsv")
+    print("   Alignments split at the island boundary. The last column is matched")
+    print("   bases over aligned length from minimap2's PAF, which **includes gaps**")
+    print("   and is therefore not an identity: a contig at 99% identity can read as")
+    print("   0.81 here. Use it to compare species against each other, nothing more.")
+    print("   %-14s %-9s %-22s %9s %9s  %s"
+          % ("contig", "region", "species", "matched", "aligned", "mat/aln"))
+    for r in rows:
+        al = float(r["aligned_bp"])
+        print("   %-14s %-9s %-22s %9s %9s  %6.1f%%"
+              % (r["contig"], r["region"], r["species"], r["matched_bp"],
+                 r["aligned_bp"], 100.0 * int(r["matched_bp"]) / al if al else 0.0))
+    print()
+    print("   Note k119_70945: its backbone matches C. koseri better than")
+    print("   K. pneumoniae, so similarity does NOT place it in Klebsiella.")
+    print("   Our working notes claimed the opposite. See CORRECTIONS.md item 16.")
+    print()
+    d = {r["what"]: r["value"] for r in load("kleborate/contig_depth.tsv")}
+    mean = float(d["bin_depth_length_weighted_mean"])
+    print("   Coverage depth instead. The bin: %s contigs, %s bp,"
+          % (d["bin_contigs"], d["bin_bp"]))
+    print("   length-weighted mean depth %.2f, median %s over %s contigs >=10 kb."
+          % (mean, d["bin_depth_median_contigs_over_10kb"],
+             d["bin_contigs_over_10kb"]))
+    seen = []
+    for k in d:
+        if k.startswith("island_contig_") and k.endswith("_depth"):
+            c = k[len("island_contig_"):-len("_depth")]
+            seen.append((int(d["island_contig_%s_bp" % c]), c, float(d[k])))
+    for bp, c, dep in sorted(seen, reverse=True):
+        rel = dep / mean
+        note = ""
+        if abs(rel - 2.0) < 0.1:
+            note = "   <- twice the genome: a collapsed two-copy repeat"
+        elif abs(rel - 1.0) < 0.15:
+            note = "   <- at the genome's own depth"
+        elif rel < 0.7:
+            note = "   <- does NOT fit the genome's depth"
+        print("     %-14s %8d bp  depth %6.2f  = %.2fx the bin%s"
+              % (c, bp, dep, rel, note))
+    print()
+    print("   C. koseri is not in this sample to be their source: its genome")
+    print("   breadth never exceeds 0.028, and the clb island it carries is")
+    print("   itself 1.1% of its genome. So the argument is coverage depth plus")
+    print("   the absence of the alternative - weaker than section 5's single")
+    print("   contig, and not presented as equivalent to it.")
+
+
 def main():
     rows = load("per_sample.tsv")
     depth_difference(rows)
@@ -371,6 +424,7 @@ def main():
     carriers()
     assembly()
     typing()
+    backbone()
 
 
 if __name__ == "__main__":

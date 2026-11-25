@@ -134,7 +134,8 @@ python3 code/analyse.py          # 標準ライブラリだけ。scipy 不要。
 python3 code/verify_rarefy.py    # 計算で間引いた値と、実際に fastq を間引いて
                                  # 貼り直した値を突き合わせる（2 検体・5 回）
 python3 code/verify_extra.py     # 以前は検算できなかったものを計算し直す
-                                 # （深さの差・比のずれ・回帰・担い手・接合部・型別）
+                                 # （深さの差・比のずれ・回帰・担い手・接合部・
+                                 #   型別・島の contig の帰属）
 python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要ネットワーク）
 ```
 
@@ -162,14 +163,14 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
-| `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別を計算し直す |
+| `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別、島の contig が本当にそのゲノムのものかを計算し直す |
 | `code/verify_repeat.py` | AM229678.1 を ENA から取って重複を測り直す。**唯一ネットワークが要る**スクリプト |
 | `data/carrier_six_genomes.tsv` | 担い手の表の元データ。検体ごと・種ごとの覆われた塩基数と深さの総和 |
 | `data/assembly_alignment.tsv`、`data/assembly_junction_depth.tsv` | *Klebsiella* の染色体と島を両方載せたコンティグと、その接合部の読み取りの深さ |
-| `data/kleborate/` | アセンブルで確認した *K. pneumoniae* 担い手の Kleborate 型別。2 回の実行の両方と、どの contig がどの袋に入ったか・なぜそうなったか |
+| `data/kleborate/` | アセンブルで確認した *K. pneumoniae* 担い手の Kleborate 型別。2 回の実行の両方、どの contig がどの袋に入ったか・なぜそうなったか、島の contig の島以外の部分と被覆深さ |
 | `data/clb_in_six_genomes.tsv` | 6 種の参照ゲノムのうちどれが *clb* 島を自分で持っているか（完全一致 40-mer）。contig の種への割り振りを読むのに要る |
 | `data/rarefy_check_hist.tsv` | 実際に fastq を間引いて貼り直した 5 回分の深さの度数分布 |
-| `code/make_*.py` | `data/` の中身を作業ツリーからどう作ったか。生成スクリプト 6 本。一覧は [code/README.md](code/README.md) |
+| `code/make_*.py` | `data/` の中身を作業ツリーからどう作ったか。生成スクリプト 7 本。一覧は [code/README.md](code/README.md) |
 | `pipeline/` | fastq から始める人向けの、取得と貼り付けのスクリプト |
 
 ## データの出典
