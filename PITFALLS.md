@@ -22,8 +22,13 @@ measurement (item 3) we could not find reported. That is still worth writing dow
 it is not four new findings.
 
 The check was targeted, not systematic: six literature searches plus full-text reads
-of the two papers named above. It is not a systematic review, and a further item may
-yet turn out to be published. See [CORRECTIONS.md](CORRECTIONS.md) item 9.
+of the three papers named in [Sources](#sources). It is not a systematic review, and a
+further item may yet turn out to be published. See
+[CORRECTIONS.md](CORRECTIONS.md) item 9.
+
+For items 2 and 4 the claim "known but not applied" is checkable against a specific
+published study, whose methods we read in full: see
+[A worked example](#a-worked-example-of-items-2-and-4-in-a-published-study) below.
 
 ---
 
@@ -254,6 +259,93 @@ by linearity of expectation, computable from depth histograms alone.
 
 ---
 
+## A worked example of items 2 and 4 in a published study
+
+The claim above is that these are known facts not applied to *pks* detection. Here is
+one study where that can be checked, because its methods are explicit. We read the
+full text (Europe PMC, PMC10797792).
+
+**Terlouw D, Boot A, Ducarmon QR, et al. Enrichment of colibactin-associated
+mutational signatures in unexplained colorectal polyposis patients. *BMC Cancer*
+2024;24:102. doi:10.1186/s12885-024-11849-y**
+
+This is a study of colorectal polyposis and mutational signatures, in which fecal
+metagenomics on 25 patients is a secondary analysis. It is not a CRC case-control
+study and it is not comparable in scope to this reanalysis. We cite it only because
+its *pks* detection is documented well enough to compare, and because we could not
+find a *pks* metagenomics paper that does apply breadth or a mapping-quality filter.
+
+Their detection, verbatim from Materials and methods:
+
+> The quality-trimmed reads were screened for the presence of the *pks* island by
+> mapping to the colibactin gene cluster (accession ID AM229678) using BWA-MEM
+> (version 0.7.17). Mapped reads were deduplicated using Picard MarkDuplicates
+> (version 2.23.3) to remove technical artifacts and improve quantification.
+
+The positive call, same section (the rule is attributed to an earlier paper by Nooij
+et al., which we have not read):
+
+> As previously outlined, fecal samples positive for **at least one *pks* gene** were
+> considered *pks*-positive.
+
+The quantity:
+
+> For mean RPKM of the entire *pks* island, RPKMs of all individual genes were summed
+> and divided by the total number of 19 *clb* genes.
+
+Against the four items:
+
+| | |
+|---|---|
+| Item 1, the duplication | Not mentioned. No MAPQ filter appears anywhere in the methods, so reads from the repeat are retained rather than discarded - the opposite of our problem, and it inflates RPKM for *clbJ* and *clbK* specifically. |
+| Item 2, read counts | **This is the pitfall exactly.** Abundance is RPKM over the cluster. The 5,685 bp of AM229678 that is not *clb* gene sequence is excluded by using per-gene coding sequences, which is better than counting over the whole cluster - but the presence call is one gene's worth of reads, with no breadth and no minimum depth. |
+| Item 3, density ratios | Not applicable; they do not compute one. |
+| Item 4, depth | RPKM normalises *abundance* by library size, but the **presence call does not**. "At least one *pks* gene" is maximally depth-sensitive: a deeper sample is more likely to be called positive for a reason that has nothing to do with carriage. The paper does not report whether sequencing depth differed between its case and control groups. |
+
+Their *pks* result, verbatim from Results:
+
+> 59% (10 out of 17) of the cases were *pks* positive compared to 25% (2 out of 8) of
+> controls (p-value = 0.124).
+
+and
+
+> no significant correlation between number of adenomas/carcinomas with *APC* variants
+> fitting SBS88 or ID18 and the *pks* RPKM values was observed (Pearson: R = 0.16,
+> p-value = 0.45).
+
+**Both are null.** The abstract describes the same comparison as having "revealed
+enriched presence of *pks* genes in patients with somatic variants fitting
+colibactin-associated signatures", without the P value. We note this because it is the
+pattern our own [CORRECTIONS.md](CORRECTIONS.md) item 4 records us falling into: a
+headline written from the direction of a non-significant difference.
+
+Their stated limitations are the small sample and the FFPE tissue, plus that "shotgun
+fecal metagenomics is a broad analyses but a more sensitive qPCR approach ... could
+give more insight". Sensitivity is acknowledged; depth confounding and breadth are not
+discussed.
+
+### One further observation, offered as a question rather than a criticism
+
+> None of the bacteria previously associated with colorectal cancer, like *Fusobacterium
+> nucleatum*, *Bacteroides fragilis*, *Campylobacter jejuni* and *Clostridioides
+> difficile*, or capable of producing colibactin, like *K. pneumoniae*, *E. aerogenes*
+> and *C. koseri*, were detected in any of the stool samples (data not shown).
+
+In our 397 samples, *K. pneumoniae* is detected in **96 of the 221 samples where we
+measured it (43%)**, though at low abundance - median 0.0010%, maximum 0.4576%. At
+that level a detection is a handful of marker reads, so a profiler with a stricter
+floor reporting zero is **not necessarily inconsistent** with our numbers, and we
+cannot tell which it was: no threshold is given and the data are not shown.
+
+It matters because of what it forecloses. If no *Klebsiella* is detected, no *pks*
+island can be attributed to *Klebsiella*, and attribution defaults to *E. coli* by
+construction. Our own six-genome analysis in [RESULTS.md](RESULTS.md) finds the island
+better explained by *K. pneumoniae* than by *E. coli* in 3 of 15 positives, and finds
+4 of 14 impossible to assign at all - which cannot happen in a pipeline where the
+competing species is absent by definition.
+
+---
+
 ## Sources
 
 Read in full and quoted above:
@@ -264,6 +356,9 @@ Read in full and quoted above:
 - Blanco-Míguez A, *et al.* Targeted depletion of *pks*+ bacteria from a fecal
   microbiota using specific antibodies. *mSystems* 2023;8(3):e00079-23.
   doi:10.1128/msystems.00079-23
+- Terlouw D, Boot A, Ducarmon QR, *et al.* Enrichment of colibactin-associated
+  mutational signatures in unexplained colorectal polyposis patients. *BMC Cancer*
+  2024;24:102. doi:10.1186/s12885-024-11849-y (PMC10797792)
 
 Not read in full. These were located by literature search and are given as entry
 points for the general principles in items 2, 3 and 4, not as verified support for any
