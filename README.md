@@ -110,7 +110,7 @@ backwards twice. What is left is a set of measurements:
    "1480 bp", which we cannot reproduce at any identity threshold.
 2. **The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence**, so
    island-negative samples still accumulate reads on it. Across the **106** samples
-   with breadth below 0.1 and at least 50 reads mapped, the median is **260 reads**
+   with breadth below 0.1 and at least 50 reads mapped, the median is **258 reads**
    (maximum 10,548) at a median breadth of 0.0018.
 3. **A marker-gene density ratio carries a ~1.9x systematic offset**, decomposed as
    1.115 (= 55140/49455) x 1.14 (marker fragment edge loss) x ~1.50 (residual). Usable
