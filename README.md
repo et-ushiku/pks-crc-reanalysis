@@ -30,46 +30,94 @@ and the three things about it we could not resolve from their text.
 
 ---
 
-## What is actually new here
+## What this adds
 
 The negative result is a second, independent confirmation of something already
-published, so its novelty is modest. The part that may save other people time is
-[PITFALLS.md](PITFALLS.md) - four ways that *pks* detection from shotgun stool
-metagenomes goes wrong.
+published, so its novelty is modest. Three other things came out of the work, in
+descending order of how well they survived checking against the literature.
 
-An earlier version of this README claimed none of the four was documented anywhere.
-**That was wrong.** Items 1, 2 and 4 all have published antecedents, which
-[PITFALLS.md](PITFALLS.md) now names and quotes; see
-[CORRECTIONS.md](CORRECTIONS.md) items 9 and 10. Reading the upstream methods paper
-(Nooij et al. 2021) in full then narrowed it further: that paper already subsamples to
-a common depth, already states that single-gene detection needs high depth, and
-already excludes marker genes after finding homology-driven uneven coverage in them.
-Items 3 and 4 are in substance anticipated there. **Item 1 is a pitfall for
-breadth-based calling, which is our own method, and barely affects read-count
-methods** - we had that backwards at first (item 10). What is left is a set of
-measurements for this reference and this target, not four new findings.
+### 1. Who carries the island, measured instead of assumed
 
-1. **The reference contains a ~1,290 bp duplication, so breadth of coverage can never
-   reach 1.0.** In AM229678.1 the same 1,287 bp appears at 16,066-17,352 (inside
-   *clbK*) and 21,719-23,005 (inside *clbJ*), 99.845% identical. Reads there are
-   multi-mapping and are discarded at MAPQ 20. The observed ceiling is **~0.95**
-   (maximum seen in 397 samples: 0.9607). A sample at 0.95 is not a partial island.
-   The repeat itself was published by Auvray et al. 2021 (as "1480 bp", which we
-   cannot reproduce); its effect on read mapping is what we add. At >= 10x island
-   depth the loss is confined to those two genes: breadth 0.8065 for *clbK* and
-   0.8450 for *clbJ*, against 0.9982 for the other 16.
-2. **Raw read counts against the island are not a measure of island abundance.**
-   The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence.
-   Island-negative samples still accumulate reads there (median background
-   pks/*E. coli* ratio 0.012 across 82 such samples), with breadth near 0.004.
-3. **A marker-gene density ratio carries a large systematic offset.** Ours was
-   ~1.9x, decomposed as 1.115 (island length convention) x 1.14 (marker fragment
-   edge loss) x ~1.50 (residual marker-vs-island mappability). Ratios are useful for
-   exclusion ("this species cannot account for the signal"), not for attribution.
-4. **Breadth is depth-limited below about 10x island coverage.** 34 of 44 positive
-   samples sat below that. Group differences in sequencing depth therefore masquerade
-   as group differences in carriage - in one of our cohorts the depth difference
-   between groups is enormous (P = 1.5e-14). Equalise depth before calling.
+This is the part we would point a reader at first.
+
+All 14 *pks*-positive CN-CRC samples were mapped to **six complete
+Enterobacteriaceae genomes in a single competitive index** at MAPQ 20 - *E. coli*
+IHE3034, *K. pneumoniae* HS11286, *C. freundii* CFNIH1, *C. koseri* BAA-895,
+*E. cloacae* ATCC13047 and *K. aerogenes* KCTC2190 - so that reads from the genomes
+compete and ambiguous ones are dropped. The readout is island depth divided by each
+species' genome depth, from the same read set. Full table in
+[RESULTS.md](RESULTS.md).
+
+| Finding | |
+|---|---|
+| **Cannot be assigned to any species** | **4 of 14.** *E. coli* and *K. pneumoniae* are both abundant and both ratios fit. In one control, *E. coli* sits at ratio 0.76 and Kp at 0.97, both with genome breadth above 0.7. |
+| Better explained by *K. pneumoniae* than *E. coli* | 3 of 15 across both cohorts examined - and **two of the three are controls**, which is the opposite of what a disease association predicts |
+| Confirmed by assembly | 1, with the island and the *Klebsiella* chromosome on a single contig |
+| **Abundance is not carriage** | Two samples carry *K. pneumoniae* at 16.7x and **109x** genome depth (breadth > 0.88) where the island nonetheless tracks *E. coli* |
+
+**Species attribution of this island from stool reads fails outright in roughly a
+quarter to a third of positive samples, and it fails precisely where two
+Enterobacteriaceae are co-abundant.** We have not found a paper that reports what
+fraction of its positives it could not assign.
+
+What the literature does instead is default to *E. coli*:
+
+- Nooij et al. 2021 found *pks* reads in donor samples with no detectable *E. coli*,
+  **detected *Klebsiella*, *Enterobacter* or *Citrobacter* in 6 of 11 such samples**,
+  and concluded *E. coli* was "in fact the host" on the grounds that pathogenic
+  isolates are screened out of healthy donors. *K. pneumoniae* is a common commensal;
+  pathogen screening does not exclude it.
+- Their own Supplementary Figure 1 shows the 19 *clb* genes correlating with three
+  *E. coli* single-copy markers at a **median of +0.02 over 57 pairs**, 24 of them
+  negative, while the markers correlate with each other at 0.87 to 0.99. *pks*
+  abundance does not track *E. coli* abundance in their data. (A single *pks*+ strain
+  among several co-resident *E. coli* would also produce this, so it is not proof of
+  another carrier - it is an absence of support for *E. coli*.)
+- Terlouw et al. 2024 report that *K. pneumoniae*, *E. aerogenes* and *C. koseri* were
+  "not detected in any of the stool samples (data not shown)" across 25 deep
+  metagenomes. A pipeline that detects no *Klebsiella* attributes every island to
+  *E. coli* by construction.
+
+Quotations and sources for all three are in [PITFALLS.md](PITFALLS.md).
+
+### 2. The whole analysis reproduces from 753 KB, and the shortcut is checked
+
+The four cohorts are roughly 2.5 TB of FASTQ and none of it is needed, because every
+call is a function of the per-gene depth histograms. The substitution is exact by
+linearity of expectation, and it is also checked against FASTQ that really was
+subsampled and remapped: largest gap **0.0211** over five runs, smaller than the
+**0.0182** spread between seeds at the same depth, with **all five calls agreeing**.
+See the next section to run it, and [METHODS.md](METHODS.md) for the derivation and
+what the check does not settle.
+
+### 3. Four measurements on this reference, mostly with published antecedents
+
+[PITFALLS.md](PITFALLS.md) describes four ways *pks* detection from stool metagenomes
+goes wrong. **An earlier version of this README claimed none of the four was
+documented anywhere. That was wrong**, and the file now names and quotes the
+antecedents; see [CORRECTIONS.md](CORRECTIONS.md) items 9, 10 and 11. Items 3 and 4
+are in substance anticipated by Nooij et al. 2021, which already subsamples to a
+common depth and already excludes marker genes after finding homology-driven uneven
+coverage in them. **Item 1 turned out to be a pitfall for breadth-based calling,
+which is our own method, and barely affects read-count methods** - we had that
+backwards twice. What is left is a set of measurements:
+
+1. **A ~1,290 bp duplication caps breadth at ~0.95.** In AM229678.1 the same 1,287 bp
+   appears at 16,066-17,352 (in *clbK*) and 21,719-23,005 (in *clbJ*), 99.845%
+   identical; those reads are discarded at MAPQ 20. At >= 10x island depth the loss is
+   confined to those two genes - breadth 0.8065 for *clbK*, 0.8450 for *clbJ*, against
+   0.9982 for the other 16. The repeat was published by Auvray et al. 2021 as
+   "1480 bp", which we cannot reproduce at any identity threshold.
+2. **The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence**, so
+   island-negative samples still accumulate reads on it: median background
+   *pks*/*E. coli* read ratio 0.012 across 82 such samples, at breadth ~0.004.
+3. **A marker-gene density ratio carries a ~1.9x systematic offset**, decomposed as
+   1.115 x 1.14 x ~1.50. Usable for exclusion, not attribution. This is the only one
+   of the four for which we found no published antecedent.
+4. **Breadth is depth-limited below ~10x island coverage**; 34 of 44 positive samples
+   sat below it. In one cohort the between-group depth difference is P = 1.5e-14, so
+   calling on raw data would find more carriers in the cancer group for a purely
+   technical reason.
 
 ## Reproducing the result without the raw data
 
@@ -107,9 +155,9 @@ different seeds at the same depth, and **all five calls agree**. See
 
 | Path | What it is |
 |---|---|
-| [RESULTS.md](RESULTS.md) | All result tables, per cohort and pooled, plus the carrier analysis |
+| [RESULTS.md](RESULTS.md) | **The carrier analysis** (all 14 positives against six genomes), plus every result table per cohort and pooled |
 | [METHODS.md](METHODS.md) | Pipeline, reference, pre-specified thresholds, rarefaction derivation |
-| [PITFALLS.md](PITFALLS.md) | The four failure modes above, with the data that shows each |
+| [PITFALLS.md](PITFALLS.md) | The four measurements above, what was already published about each, and a worked example in a published study |
 | [CORRECTIONS.md](CORRECTIONS.md) | Every claim we made and later had to withdraw, and why |
 | `data/depth_hist.tsv` | Per-sample, per-gene depth histograms - **the reproducible dataset** |
 | `data/per_sample.tsv` | 397 rows: breadth, genes called, call, read count, *E. coli* %, *K. pneumoniae* % (**NA where that species was never measured** - see CORRECTIONS.md item 7) |
@@ -143,18 +191,13 @@ Reference: *E. coli* IHE3034 *pks* island, GenBank **AM229678.1** (55,140 bp).
   changes when the analysis is varied. In CN-CRC the odds ratio moves from 0.85
   (unrarefied) to 2.13 (rarefied). Neither is significant; the honest statement is
   "no significant difference", not "fewer in cancer" or "more in cancer".
-- **Carrier attribution fails outright in 4 of 14 samples.** All 14 CN-CRC positives
-  were mapped to six complete Enterobacteriaceae genomes in one competitive index.
-  Four could not be assigned to any species, because *E. coli* and *K. pneumoniae*
-  were both abundant and both ratios were consistent with carriage. Three samples are
-  best explained by *K. pneumoniae* rather than *E. coli*, but only one of those was
-  confirmed by assembly, where the island and the *Klebsiella* chromosome co-occur on
-  one contig; the other two rest on coverage-ratio arguments, which are suggestive,
-  not proof. **Two of the three are controls.**
-- **Abundance is not carriage.** Two samples carry an abundant *K. pneumoniae*
-  (16.7x and **109x** genome depth, breadth >0.88) where the island nonetheless tracks
-  *E. coli*. We initially read the 109x sample as *Klebsiella* on abundance alone and
-  were wrong (CORRECTIONS.md item 8).
+- **The carrier analysis rests on 14 samples and one assembly.** Of the three
+  *K. pneumoniae* attributions, only one is confirmed by linkage on a single contig;
+  the other two rest on coverage ratios, which are consistent with carriage but do not
+  prove it, and their FASTQ was deleted after measurement so the check cannot be run
+  now. The "4 of 14 unassignable" figure is a property of these cohorts at these
+  depths, not a constant. We also read one sample as *Klebsiella* on abundance alone
+  before measuring it, and were wrong (CORRECTIONS.md item 8).
 - **We detect sequence, not function.** Auvray et al. 2021 found that **16 of 109**
   *pks*-positive *E. coli* strains (15%) had lost genotoxicity through mutations in
   *clbB* or *clbD* or a *clbJK* fusion, while mostly still producing small amounts of
