@@ -34,9 +34,14 @@ metagenomes goes wrong.
 An earlier version of this README claimed none of the four was documented anywhere.
 **That was wrong.** Items 1, 2 and 4 all have published antecedents, which
 [PITFALLS.md](PITFALLS.md) now names and quotes; see
-[CORRECTIONS.md](CORRECTIONS.md) item 9. The accurate claim is that these are places
-where known methodological facts are **not being applied** to *pks* detection, plus
-one measurement (item 3) we could not find reported.
+[CORRECTIONS.md](CORRECTIONS.md) items 9 and 10. Reading the upstream methods paper
+(Nooij et al. 2021) in full then narrowed it further: that paper already subsamples to
+a common depth, already states that single-gene detection needs high depth, and
+already excludes marker genes after finding homology-driven uneven coverage in them.
+Items 3 and 4 are in substance anticipated there. **Item 1 is a pitfall for
+breadth-based calling, which is our own method, and barely affects read-count
+methods** - we had that backwards at first (item 10). What is left is a set of
+measurements for this reference and this target, not four new findings.
 
 1. **The reference contains a ~1,290 bp duplication, so breadth of coverage can never
    reach 1.0.** In AM229678.1 the same 1,287 bp appears at 16,066-17,352 (inside
@@ -44,7 +49,9 @@ one measurement (item 3) we could not find reported.
    multi-mapping and are discarded at MAPQ 20. The observed ceiling is **~0.95**
    (maximum seen in 397 samples: 0.9607). A sample at 0.95 is not a partial island.
    The repeat itself was published by Auvray et al. 2021 (as "1480 bp", which we
-   cannot reproduce); its effect on read mapping is what we add.
+   cannot reproduce); its effect on read mapping is what we add. At >= 10x island
+   depth the loss is confined to those two genes: breadth 0.8065 for *clbK* and
+   0.8450 for *clbJ*, against 0.9982 for the other 16.
 2. **Raw read counts against the island are not a measure of island abundance.**
    The 55,140 bp reference contains 5,685 bp that is not *clb* gene sequence.
    Island-negative samples still accumulate reads there (median background

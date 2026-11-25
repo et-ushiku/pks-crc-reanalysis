@@ -238,6 +238,42 @@ widening the interval by 39 bp at each end moves nothing.
 
 ---
 
+## 10. "Omitting a MAPQ filter inflates RPKM for clbJ and clbK"
+
+**What we said**, in PITFALLS.md and in the commit message that introduced the worked
+example: that a pipeline without a mapping-quality filter retains the duplicated
+reads and so inflates the per-gene RPKM of *clbJ* and *clbK*.
+
+**Why it was wrong.** BWA-MEM reports one primary alignment per read. A read from the
+repeat is counted **once**, placed arbitrarily at one of the two copies. The total over
+*clbJ* + *clbK* is therefore preserved, and nothing is inflated. What is unreliable is
+only the split between the two genes.
+
+**Root cause.** We reasoned from our own filter's behaviour - we drop those reads, so
+they must be being double-counted by someone who does not - without checking what an
+unfiltered aligner actually emits.
+
+**What this means, and it cuts against us.** A method that averages read counts over
+the *clb* genes is **barely affected by the duplication at all**. A breadth method
+loses ~19% of *clbK* and ~16% of *clbJ* permanently. So pitfall 1 is not a defect we
+found in other people's pipelines; it is a property of the reference that anyone
+calling presence from coverage - **us included** - has to know, and we met it because
+of a design choice we made. PITFALLS.md now says this, with the per-gene breadths at
+>= 10x island depth as the evidence: 0.8065 for *clbK*, 0.8450 for *clbJ*, 0.9982 mean
+for the other 16 genes.
+
+**A second, related overreach.** The preamble to PITFALLS.md framed all four items as
+"known methodological facts not being applied to *pks* detection". Reading Nooij et al.
+2021 in full showed that framing is too broad: that paper subsamples every metagenome
+to a common 10 million read pairs, states outright that "metagenomics-based assays
+require high sequencing depths to reliably detect single genes", and **excludes marker
+genes after detecting homology-driven uneven coverage in them** - which is the
+reasoning behind our items 1 and 3, applied before we did it. Items 3 and 4 are, in
+substance, anticipated there. Only item 1 is absent from it. The preamble and the
+item 4 row were rewritten accordingly.
+
+---
+
 ## What did not change
 
 No pre-specified threshold was altered at any point after results were seen:

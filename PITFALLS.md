@@ -11,10 +11,10 @@ Three of the four have their core already in the literature:
 
 | Item | Status |
 |---|---|
-| 1. The duplication | **The repeat itself is published.** Auvray et al. 2021 report recombination between "two copies of a 1480 bp homologous sequence located in *clbJ* and *clbK*". What we add is its effect on read mapping, and a measurement of its extent that does not match theirs. |
+| 1. The duplication | **The repeat itself is published.** Auvray et al. 2021 report recombination between "two copies of a 1480 bp homologous sequence located in *clbJ* and *clbK*". What we add is its effect on read mapping, and a measurement of its extent that does not match theirs. It is a pitfall **for breadth-based methods, ours included**, and barely touches read-count methods - see [the correction](#item-1-is-a-pitfall-for-breadth-based-methods-which-includes-ours). |
 | 2. Read counts are not abundance | **Both the principle and the premise are published.** Breadth-based presence calling over read counts is an established idea in metagenomics methods, and Blanco-Míguez et al. 2023 state that the AM229678 cluster contains "genes not belonging to the island". What we add is the quantification for this reference and the demonstration that *pks* studies still call by read count. |
 | 3. The density-ratio offset | We found no report of this specific offset. The general class - mappability and average-genome-size biases in metagenomic gene abundance - is well established. |
-| 4. Depth-limited breadth | **The principle is published.** That shallow sequencing cannot support gene presence/absence calls, and that sequencing effort confounded with treatment group is a known source of false positives, are both established. What we add is the threshold for this island (~10x) and a worked example in a real cohort. |
+| 4. Depth-limited breadth | **The principle is published, and stated for this island.** Nooij et al. 2021 write that "metagenomics-based assays require high sequencing depths to reliably detect single genes" and subsample to a common 10 million read pairs. What we add is the threshold at which breadth stops being depth-limited (~10x island depth) and a worked example where the confounding is real. |
 
 So the honest claim is narrower than the one we first made: **these are four places
 where known methodological facts are not being applied to *pks* detection**, plus one
@@ -22,7 +22,7 @@ measurement (item 3) we could not find reported. That is still worth writing dow
 it is not four new findings.
 
 The check was targeted, not systematic: six literature searches plus full-text reads
-of the three papers named in [Sources](#sources). It is not a systematic review, and a
+of the four papers named in [Sources](#sources). It is not a systematic review, and a
 further item may yet turn out to be published. See
 [CORRECTIONS.md](CORRECTIONS.md) item 9.
 
@@ -100,6 +100,20 @@ In the 13 samples with island depth >= 10x:
 missing bases inside the duplication:   1,920 - 2,140  (mean 2,000)
 samples with zero missing bases outside the duplication:  11 of 13
 ```
+
+Per gene, in those same 13 samples, the loss is confined to exactly the two genes
+Auvray et al. named and nothing else:
+
+| Gene | Length | Mean breadth at >= 10x |
+|---|---|---|
+| ***clbK*** | 6,465 bp | **0.8065** |
+| ***clbJ*** | 6,501 bp | **0.8450** |
+| the other 16 *clb* genes | - | **0.9982** (mean) |
+
+**19.3% of *clbK* and 15.5% of *clbJ* are unreachable, against 0.2% for everything
+else.** This is the cleanest statement of the problem: at sufficient depth the island
+is complete apart from the repeat, and the repeat sits inside those two genes.
+Reproduce it from `data/depth_hist.tsv` and `data/clb_genes.bed`.
 
 The duplication cost is **nearly constant and independent of depth**; everything else
 is depth-limited. Across all 397 samples the highest breadth observed is **0.9607**,
@@ -259,6 +273,113 @@ by linearity of expectation, computable from depth histograms alone.
 
 ---
 
+## Item 1 is a pitfall for breadth-based methods, which includes ours
+
+**Correction to an earlier version of this file**, which said that omitting a MAPQ
+filter "inflates RPKM for *clbJ* and *clbK* specifically". **That is wrong.** BWA-MEM
+reports one primary alignment per read, so a read from the repeat is counted once,
+placed arbitrarily at one of the two copies. The *total* over *clbJ* + *clbK* is
+preserved; what is unreliable is the split between them. Nothing is inflated.
+
+The consequence of this is worth stating plainly, because it cuts against us:
+
+- **A read-count method that averages over the genes is barely affected.** The repeat's
+  reads are retained and the sum is right, so a mean RPKM across 19 *clb* genes does
+  not care that 1,287 bp of it is ambiguous.
+- **A breadth method is affected a lot.** Discarding those reads at MAPQ 20 removes
+  ~19% of *clbK* and ~16% of *clbJ* permanently, which is why breadth stops at ~0.95.
+
+So item 1 is **not** a defect we found in other people's read-counting pipelines. It is
+a property of the reference that anyone calling presence from coverage - us included -
+has to know about, and we hit it because of a design choice we made. The per-gene table
+above is the evidence either way.
+
+## The upstream source of the one-read rule, and what it gets right
+
+The positive-call rule in the worked example below traces to:
+
+**Nooij S, Ducarmon QR, Laros JFJ, et al. Fecal Microbiota Transplantation Influences
+Procarcinogenic *Escherichia coli* in Recipient Recurrent *Clostridioides difficile*
+Patients. *Gastroenterology* 2021;161(4):1218-1228.e5.
+doi:10.1053/j.gastro.2021.06.009** (CC BY; read in full from the Leiden University
+repository, hdl.handle.net/1887/3249076, the publisher's own pages being blocked)
+
+Their rule, verbatim, is weaker than its restatement elsewhere - **one read, not one
+gene**:
+
+> Individuals with 0 reads mapped to *clb* genes in their metagenome are considered
+> *pks*-negative (*pks*-) and individuals with **1 or more reads mapped to 1 or more
+> *clb* genes are *pks*+**.
+
+With that threshold they report 55% of patients and 29% of donor samples positive.
+
+**But this paper anticipates two of our four items, and we should say so before
+criticising anything.** It was the upstream method for the example below, and it is
+more careful than that example conveys.
+
+It rarefies, in effect, before analysis:
+
+> Raw metagenomic reads were randomly subsampled to 10 million read pairs
+
+(stated as being "to facilitate de novo assembly", and their sequencing target was
+10 million reads per sample, so depth is roughly equalised either way - a cap rather
+than an exact match, since samples below 10M keep everything.)
+
+It detects homology-driven coverage distortion and **removes the affected genes**,
+which is the reasoning behind our items 1 and 3, applied to marker genes:
+
+> Based on the depth of coverage, we found that the MLST genes sometimes showed uneven
+> coverage, especially in metagenomes with more non-*E coli* Enterobacteriaceae. This
+> indicates that these genes may have regions that are homologous to genes from other
+> species, so the MLST genes were excluded.
+
+And it states item 4's principle outright, and combines genes to address it:
+
+> Metagenomics-based assays require high sequencing depths to reliably detect single
+> genes. We combined data of all 19 *clb* genes, which we showed are highly
+> intercorrelated, to improve the sensitivity of our assay and allow us to detect very
+> low levels of *pks*.
+
+They also flag their own detection floor - "Levels of *pks* are generally very low,
+near the limit of detection" - which is item 4 by another name.
+
+**What is missing is item 1 only**: no mapping-quality filter and no mention of the
+*clbJ*/*clbK* repeat. Per the correction above, that costs their headline quantity
+almost nothing. It does make their per-gene RPKM values for those two genes
+arbitrary, which matters for the gene-to-gene correlation matrix they use to argue the
+island travels intact.
+
+### Where our data disagrees with them
+
+Having found *pks* reads in samples with no detectable *E. coli*, they considered the
+alternative carriers and ruled them out:
+
+> Although we detected *Klebsiella*, *Enterobacter*, and *Citrobacter* spp using the
+> assembly based approach in 6 of 11 donor samples with *pks* but that were negative
+> for *E coli* based on the 3 single-copy marker genes, pathogenic isolates of these
+> species are unlikely to be present in healthy donors due to thorough screening. We
+> therefore consider it more likely that *E coli* was present below the detection limit
+> of our assay and is in fact the host of the *pks* island.
+
+**This is the attribution default our carrier analysis argues against**, and it is the
+one place where our data speaks directly to theirs. In 6 of 11 relevant samples they
+detected a plausible alternative carrier and preferred *E. coli* anyway, on the
+grounds that *pathogenic* isolates are screened out of healthy donors. *K. pneumoniae*
+is a common gut commensal, and screening for pathogens does not exclude it.
+
+Our [RESULTS.md](RESULTS.md) finds, in 15 positives measured against six complete
+genomes in one competitive index: 3 better explained by *K. pneumoniae* than by
+*E. coli*, **two of those three being controls rather than cases**, one of them
+confirmed by assembly with the island and the *Klebsiella* chromosome on a single
+contig - and 4 of 14 that cannot be assigned to any species at all. We also have a
+sample where *K. pneumoniae* sits at 109x genome depth and is still not the carrier,
+so the inference runs both ways and neither default is safe.
+
+We are not claiming they got their samples wrong; we have not seen their data and
+their cohort is FMT donors and *C. difficile* patients, not ours. We are claiming the
+reasoning - "the alternative is unlikely in this population, therefore *E. coli*" -
+is the step that needs the measurement, and that the measurement is now cheap.
+
 ## A worked example of items 2 and 4 in a published study
 
 The claim above is that these are known facts not applied to *pks* detection. Here is
@@ -297,7 +418,7 @@ Against the four items:
 
 | | |
 |---|---|
-| Item 1, the duplication | Not mentioned. No MAPQ filter appears anywhere in the methods, so reads from the repeat are retained rather than discarded - the opposite of our problem, and it inflates RPKM for *clbJ* and *clbK* specifically. |
+| Item 1, the duplication | Not mentioned, and **mostly does not hurt them** - see the correction below. No MAPQ filter appears anywhere, so the repeat's reads are kept rather than discarded. |
 | Item 2, read counts | **This is the pitfall exactly.** Abundance is RPKM over the cluster. The 5,685 bp of AM229678 that is not *clb* gene sequence is excluded by using per-gene coding sequences, which is better than counting over the whole cluster - but the presence call is one gene's worth of reads, with no breadth and no minimum depth. |
 | Item 3, density ratios | Not applicable; they do not compute one. |
 | Item 4, depth | RPKM normalises *abundance* by library size, but the **presence call does not**. "At least one *pks* gene" is maximally depth-sensitive: a deeper sample is more likely to be called positive for a reason that has nothing to do with carriage. The paper does not report whether sequencing depth differed between its case and control groups. |
@@ -359,6 +480,10 @@ Read in full and quoted above:
 - Terlouw D, Boot A, Ducarmon QR, *et al.* Enrichment of colibactin-associated
   mutational signatures in unexplained colorectal polyposis patients. *BMC Cancer*
   2024;24:102. doi:10.1186/s12885-024-11849-y (PMC10797792)
+- Nooij S, Ducarmon QR, Laros JFJ, *et al.* Fecal Microbiota Transplantation
+  Influences Procarcinogenic *Escherichia coli* in Recipient Recurrent *Clostridioides
+  difficile* Patients. *Gastroenterology* 2021;161(4):1218-1228.e5.
+  doi:10.1053/j.gastro.2021.06.009 (CC BY; read from hdl.handle.net/1887/3249076)
 
 Not read in full. These were located by literature search and are given as entry
 points for the general principles in items 2, 3 and 4, not as verified support for any
