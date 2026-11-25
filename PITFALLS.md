@@ -7,7 +7,7 @@ check the claim rather than take it.
 
 An earlier version of this file, and of the README, said these four items were "not
 documented anywhere". **That was wrong, and we checked it only after publishing.**
-Two of the four have their core already in the literature:
+Three of the four have their core already in the literature:
 
 | Item | Status |
 |---|---|
