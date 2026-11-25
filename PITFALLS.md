@@ -155,7 +155,7 @@ mapped to the reference:
 
 ```
 median breadth over the clb genes:        0.0018
-median reads mapped to the reference:       260
+median reads mapped to the reference:       258
 maximum reads mapped to the reference:   10,548
 ```
 
@@ -183,7 +183,7 @@ detected individually, rather than by counting reads over the cluster.
 papers still report island abundance as reads or RPKM over the cluster**, which
 inherits exactly the background measured above. What this repository adds is the size
 of that background for this reference: 5,685 bp of non-gene sequence, and a median of
-260 reads - up to 10,548 - landing on it in samples that have no island.
+258 reads - up to 10,548 - landing on it in samples that have no island.
 
 ### Consequences
 
@@ -384,6 +384,12 @@ trace in their analysis at all. See [CORRECTIONS.md](CORRECTIONS.md) item 11.
 Reading the same matrix for a different purpose turned up something that bears on the
 attribution question above. Correlations of RPKM across their metagenomes:
 
+**These figures cannot be rechecked from anything in this project.** They were read
+off the figure after extracting it from the PDF, and neither the extracted image nor
+the 57 transcribed cell values was kept - so the median and the count of negatives
+below are our arithmetic over a transcription that no longer exists. Anyone relying on
+them should read the figure themselves. See [CORRECTIONS.md](CORRECTIONS.md) item 17.
+
 | Pair | Spearman r |
 |---|---|
 | *clb* gene vs *clb* gene | ~0.79 to 0.99 (excluding *clbS*) |
@@ -519,10 +525,19 @@ discussed.
 > and *C. koseri*, were detected in any of the stool samples (data not shown).
 
 In our 397 samples, *K. pneumoniae* is detected in **96 of the 221 samples where we
-measured it (43%)**, though at low abundance - median 0.0010%, maximum 0.4576%. At
-that level a detection is a handful of marker reads, so a profiler with a stricter
-floor reporting zero is **not necessarily inconsistent** with our numbers, and we
-cannot tell which it was: no threshold is given and the data are not shown.
+measured it (43%)**, mostly at low abundance - **median 0.0143%**, but **maximum
+6.83%**, and 19 of the 101 CN-CRC samples are above 0.1%. At the median a detection is
+a handful of marker reads, so a profiler with a stricter floor reporting zero is **not
+necessarily inconsistent** with our numbers there, and we cannot tell which it was: no
+threshold is given and the data are not shown. **At the top of the range that
+reconciliation does not work** - a sample at 6.83% is not below anybody's detection
+floor - so for those samples the two results genuinely disagree.
+
+(These figures were **0.0010% and 0.4576%** until 2026-11-26, when the published
+column was found to be scaled by the *E. coli* marker length rather than
+*K. pneumoniae*'s, understating it 14.93-fold. The detection count and rate are
+unchanged, because a scale factor cannot change which values are non-zero. See
+[CORRECTIONS.md](CORRECTIONS.md) item 17.)
 
 It matters because of what it forecloses. If no *Klebsiella* is detected, no *pks*
 island can be attributed to *Klebsiella*, and attribution defaults to *E. coli* by

@@ -172,6 +172,7 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/missing_split.tsv` | Uncovered bases split inside/outside the duplication |
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
+| `code/verify_numbers.py` | Recomputes 84 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
 | `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `code/verify_repeat.py` | Fetches AM229678.1 from ENA and recomputes the duplication - the only script here that needs network access |

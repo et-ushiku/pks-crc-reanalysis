@@ -153,7 +153,8 @@ verified by re-running `code/analyse.py` after the fix.
 
 **How it surfaced.** Two control samples, `n_ERR1018236` and `n_ERR1018237`, had almost
 identical *K. pneumoniae* genome coverage (depth 2.063 / breadth 0.7643 and
-2.036 / 0.7638) while their marker columns read 0.000000 and 0.006483. A genome signal
+2.036 / 0.7638) while their marker columns read 0.000000 and 0.006483. (That second
+figure is now 0.096798: the column was rescaled in item 17. The zero is now `NA`.) A genome signal
 that strong with no marker reads should be impossible, so one of the two numbers had to
 be wrong. It was the zero.
 
@@ -584,12 +585,116 @@ PITFALLS.md item 1.
 
 ### What this says about the pattern
 
-Items 13, 15 and 16 are the same mistake three times, and the amendment above is a
-fourth. Each time, **a claim was correct in substance and wrong in what it attributed
+Items 13, 15, 16 and 17 are the same mistake four times, and the amendment above is a
+fifth. Each time, **a claim was correct in substance and wrong in what it attributed
 to the evidence we had.** Shipping the evidence is what exposed it: items 15 and 16
 were both found by someone asking for the underlying file, and the amendment was found
 by generating the file that claim depended on rather than re-reading the note that
 asserted it.
+
+---
+
+## 17. We audited every number in the prose against the shipped data
+
+The last six items were each found by someone asking for one file. This time we asked
+the question in bulk: **extract every number from the five documents and recompute it
+from `data/`.** 603 lines carry a number; after setting aside years, accessions, DOIs
+and figures quoted from papers, **84 are claims we can recompute here**. Before this
+audit **nine of them disagreed with the documents**, from four causes. The rest
+reproduced exactly. One of the nine is a measurement error rather than a stale
+figure.
+
+### The *K. pneumoniae* abundance column was wrong by 14.93x
+
+`PER_PCT = 313` means "313 marker reads per 1% abundance per million reads". It was
+calibrated **once, on the *E. coli* marker set, which is 96,300 bp**. Reads landing on
+a marker set scale with abundance **times marker length**, so the constant is specific
+to that length. `code/make_table.py` applied the same 313 to *K. pneumoniae*, whose
+marker set is **6,450 bp** - understating it by 96,300 / 6,450 = **14.93x**.
+
+The project's own working script `meta/cn_entero.py` had the scaling from the start
+(`factor[k] = b / ECOLI_BASES * PER_PCT`), and even printed the caveat that it is an
+unvalidated assumption for *Klebsiella*. Only the published column lacked it, and
+nothing compared the two.
+
+| | published until 2026-11-26 | corrected |
+|---|---|---|
+| median of detected samples | 0.0010% | **0.0143%** |
+| maximum | 0.4576% | **6.8318%** |
+| samples >= 0.1% (of 221 measured) | 4 | **24** |
+| detected (of 221 measured) | 96 (43%) | 96 (43%), unchanged |
+
+**This is what reconciles item 8 with the data.** Item 8 quotes "Kp relative abundance
+6.83% against *E. coli* 0.178%, a factor of 38" as the reasoning we had to withdraw.
+Until today a reader checking 6.83% against `data/per_sample.tsv` found 0.4576% and
+could not reconcile the two: the narrative used the scaled figure and the shipped
+column did not. The corrected column now gives 6.8318% for that sample, and the
+corrected CN-CRC count at >= 0.1% is 19, matching the working log exactly.
+
+**Effect on the result: none.** The abundance gate uses *E. coli*, whose scale factor
+is 96,300 / 96,300 = 1, so no gate decision moves. The carrier analysis uses genome
+depth, not marker abundance. Group comparisons use Mann-Whitney, which a positive
+scale factor cannot change (DE-CRC *K. pneumoniae* P = 0.502 either way). Regenerating
+the tables left `data/depth_hist.tsv` **byte-identical** and changed only the 96
+non-zero cells of one column; `code/analyse.py` reports the same 167 judgeable,
+Mantel-Haenszel OR 1.91, 95% CI 0.76-4.75, P = 0.1663, I2 = 17%.
+
+### The AT-CRC sensitivity table was stale on every number
+
+RESULTS.md said: "All five rules gave the identical table, 4/20 vs 2/20, P = 0.661."
+
+| | published | recomputed |
+|---|---|---|
+| judgeable | 20 and 20 | **21 and 21** |
+| pre-registered rule | 4/20 vs 2/20 | **5/21 vs 3/21** |
+| P | 0.661 | **0.697** |
+| do all five rules agree | yes | **no** - *clbB* >= 0.9 gives 4/21 vs 3/21 |
+
+The 20/20 denominators are from a 40-sample pilot stage. The CN-CRC table beside it
+was correct, which is why the error survived: the section looked checked. **No
+conclusion changes** - no rule reaches P < 0.05 in either cohort - but the claim that
+the rules are identical was false, and it was the claim doing the work.
+
+### Three smaller ones
+
+- **The read-rate threshold, 41.7 per million.** Taken from the mapping log's `pks=`
+  count, which is not the `island_reads` column we ship (274 against 428 for one
+  sample). From the shipped column the threshold is **56.7**. Counts and P are
+  unaffected because the threshold is *defined* as the point giving the same number of
+  positives as the pre-registered rule - which the table also did not say, and now
+  does.
+- **"Median reads mapped to the reference: 260."** The two middle values of the 106
+  samples are 256 and 260; the median is **258**.
+- **"Tataka et al. 2026" had no reference entry.** It is the one citation in these
+  documents given by name alone, with no journal and no DOI, while its AUC figures
+  carry a sensitivity analysis. Added: *BMC Microbiol* 2026;26:930,
+  doi:10.1186/s12866-026-05460-3.
+
+### One class of number cannot be checked at all, and we now say so
+
+PITFALLS.md item 11 reports correlations from Nooij et al.'s Supplementary Figure 1
+(*clbJ* vs *clbK* = 0.92; *clb* pairs ~0.79 to 0.99; mobile elements against the
+*E. coli* markers 0.47 to 0.76; the 57 *clb*-vs-marker pairs at median +0.02 with 24
+negative). Those were read off a figure extracted from the PDF. **Neither the
+extracted image nor the 57 transcribed values was kept**, so nothing in this project
+can recheck them - including the median and the count of 24, which are our arithmetic
+over values we transcribed once. They are now labelled as such.
+
+### Root cause, and the fix
+
+Every published number was computed by a script at some point. **Nothing re-derived
+the numbers in the prose from the shipped data**, so a figure went stale whenever a
+table was regenerated, and a figure computed from an input we do not ship could not be
+caught at all. Items 13, 15, 16 and the five above are all that single gap.
+
+`code/verify_numbers.py` now recomputes **84 of the numbers in these documents
+directly from `data/` and checks each one**, with the claimed value written beside the
+computation and a non-zero exit if any disagrees. It runs with no network and no
+working tree. A stale figure now fails a check instead of waiting to be noticed.
+
+That does not cover numbers quoted from papers; those are checked against the reading
+notes, which are not public. Where a quoted number cannot be rechecked from anything
+we hold, it now says so in place.
 
 ---
 

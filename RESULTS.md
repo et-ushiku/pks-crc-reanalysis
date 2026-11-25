@@ -80,8 +80,10 @@ result is significant, so "no significant difference" holds either way, but the
 
 ## Sensitivity to the calling rule
 
-Tataka et al. 2026 report that a gene-count rule performs worse than single-gene or
-summed-coverage rules. We kept our pre-registered rule and added the alternatives as a
+Tataka et al. 2026 (*BMC Microbiol* 26:930,
+[doi:10.1186/s12866-026-05460-3](https://doi.org/10.1186/s12866-026-05460-3)) report
+that a gene-count rule performs worse than single-gene or summed-coverage rules
+(*clbB* alone AUC 0.826, the 19-gene read sum 0.838, ">= 8 genes" 0.734-0.773). We kept our pre-registered rule and added the alternatives as a
 post-hoc sensitivity analysis.
 
 ### CN-CRC
@@ -92,11 +94,31 @@ post-hoc sensitivity analysis.
 | *clbB* coverage >= 0.5 | 8/44 | 7/33 | 0.777 |
 | *clbB* coverage >= 0.9 | 6/44 | 5/33 | 1.000 |
 | >= 8 of 18 genes | 8/44 | 6/33 | 1.000 |
-| Read rate >= 41.7 per million | 7/44 | 6/33 | 1.000 |
+| Read rate >= 56.7 per million | 7/44 | 6/33 | 1.000 |
+
+The read-rate rule has **no external threshold**: no published cut-off is
+transferable to our read counts, so the threshold is set at the point that yields the
+same number of positives as the pre-registered rule. It therefore tests whether the
+*ranking* reshuffles cases between the groups, not whether a published cut-off
+replicates. An earlier version of this table gave the threshold as 41.7 per million,
+taken from the mapping log's read count rather than the `island_reads` column shipped
+here; the two counts differ, and from the shipped column the threshold is 56.7. The
+counts and P are unaffected, because the threshold is defined by the positive count.
 
 ### AT-CRC
 
-All five rules gave the identical table, 4/20 vs 2/20, P = 0.661.
+| Rule | CRC | control | P |
+|---|---|---|---|
+| Pre-registered (breadth >= 0.5 and >= 14/18 genes) | 5/21 | 3/21 | 0.697 |
+| *clbB* coverage >= 0.5 | 5/21 | 3/21 | 0.697 |
+| *clbB* coverage >= 0.9 | 4/21 | 3/21 | 1.000 |
+| >= 8 of 18 genes | 5/21 | 3/21 | 0.697 |
+| Read rate >= 56.3 per million | 5/21 | 3/21 | 0.697 |
+
+Four of the five rules give the same table; *clbB* >= 0.9 moves one CRC sample out.
+An earlier version of this section said "all five rules gave the identical table,
+4/20 vs 2/20, P = 0.661", which was stale on every number - the denominators are 21
+and 21, not 20 and 20 - see [CORRECTIONS.md](CORRECTIONS.md) item 17.
 
 **No rule produces a significant difference.** The conclusion does not depend on the
 calling rule.

@@ -162,6 +162,7 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | `data/missing_split.tsv` | 覆われなかった塩基を、重複の内と外に分けたもの |
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
+| `code/verify_numbers.py` | 文書に書いた数字 84 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
 | `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別、島の contig が本当にそのゲノムのものかを計算し直す |
 | `code/verify_repeat.py` | AM229678.1 を ENA から取って重複を測り直す。**唯一ネットワークが要る**スクリプト |

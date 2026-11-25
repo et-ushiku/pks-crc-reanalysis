@@ -31,6 +31,7 @@ B = "/mnt/c/crc_strain_pilot/pks"
 BED = B + "/ref/clb_genes.bed"
 MIN_DEPTH, GENE_COVER, CALL_BREADTH, CALL_GENES, SUSPECT_BREADTH = 1, 0.5, 0.5, 14, 0.1
 PER_PCT = 313.0
+ECOLI_MARK_BP = 96300.0   # 313 を較正したときの目印の総塩基。marker_pct を参照
 
 COHORTS = {
     "FR-CRC": [B + "/out", B + "/out_desktop"],
@@ -129,6 +130,23 @@ def marker_pct(d, s, sgb):
     CN-CRC の先行 27 検体は大腸菌専用の索引だけで走らせていて、混合索引の
     counts.tsv が無い。そのため「測っていない」が「Klebsiella はいない」として
     表に載っていた。測っていないものは NA と書く。
+
+    **換算係数は目印の総塩基数に比例させる。2026-11-26 に直した。**
+    PER_PCT = 313 は「大腸菌 1% あたり 100 万本中 313 本」で、*大腸菌の目印
+    96,300 塩基*で一度だけ較正した値である。目印に当たる本数は
+        量(%) × 目印の総塩基
+    に比例するので、長さの違う目印にそのまま 313 を当ててはいけない。
+    K. pneumoniae の目印は **6,450 塩基しかなく**、同じ 313 を使うと
+    96,300 / 6,450 = **14.93 倍小さい値**が出る。長さ比で較正を伸ばす。
+
+    同じ長さ比の補正を meta/cn_entero.py が最初から入れていて、そちらが出した
+    6.83% が CORRECTIONS.md の 8 番に載っている。公開した per_sample.tsv の列
+    だけが補正されていなかった。
+
+    注意: これは「読み取りの集まり方が目印の長さに比例する」という仮定である。
+    cn_entero.py は「Klebsiella では検証できていない仮定」と明記している。
+    ここでも検証できていない。ただし 15 倍短い目印に大腸菌の較正をそのまま
+    当てるのは控えめな代案ではなく、既知の倍率だけ間違っている。
     """
     fc = d + "/" + s + ".counts.tsv"
     if not os.path.exists(fc):
@@ -138,11 +156,17 @@ def marker_pct(d, s, sgb):
     if not t:
         return None
     hit = 0
+    mark_bp = None
     for line in open(fc, encoding="utf-8"):
         q = line.rstrip().split("	")
         if len(q) >= 2 and q[0] == sgb:
             hit = int(q[1])
-    return (hit / t * 1e6) / PER_PCT
+            # 4 列目が目印の総塩基。覚えている数ではなく表から読む。
+            if len(q) >= 4:
+                mark_bp = float(q[3])
+    if mark_bp is None:
+        raise SystemExit("目印の塩基数が表に無い: %s %s" % (fc, sgb))
+    return (hit / t * 1e6) / (PER_PCT * mark_bp / ECOLI_MARK_BP)
 
 
 def zeller_ecoli():

@@ -9,18 +9,27 @@ Python 3, standard library only. No arguments needed unless shown.
 | `analyse.py` | Reproduces the primary result: recomputes breadth from the depth histograms, rarefies to a common read count, applies the pre-specified gate, prints per-cohort tables and the Mantel-Haenszel meta-analysis |
 | `verify_extra.py` | Seven checks that each used to be impossible from `data/` alone: the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `verify_rarefy.py` | Checks the analytic rarefying formula against actual subsampling, and that the disagreement is smaller than the seed-to-seed spread |
+| `verify_numbers.py` | Recomputes 84 of the numbers written in the prose - breadth ceiling, duplication cost, background, carrier ratios, the DE-CRC depth confound, the *K. pneumoniae* abundance column and both sensitivity tables - and exits non-zero if any disagrees |
 
 ```
 python3 code/analyse.py            # default target 20,000,000 reads
 python3 code/analyse.py 10000000   # try a different common depth
 python3 code/verify_extra.py
 python3 code/verify_rarefy.py
+python3 code/verify_numbers.py
 ```
 
 `analyse.py` asserts that the calls recomputed from `data/depth_hist.tsv` match the
 stored calls in `data/per_sample.tsv`, so a failure means the shipped data is
 inconsistent. `verify_extra.py` likewise asserts that the `kp_plus` contig bin is
 exactly `kp_bin` plus every island-bearing contig.
+
+`verify_numbers.py` is the one that checks the **documents** rather than the data: it
+holds each published figure as a literal next to the computation that should produce
+it. It exists because nothing did that until 2026-11-26, which is how the stale
+figures in [../CORRECTIONS.md](../CORRECTIONS.md) items 13 and 17 survived. It does
+not cover numbers quoted from papers, nor numbers derived from inputs we do not
+ship - both limits are listed in its docstring.
 
 ## Needs network access
 

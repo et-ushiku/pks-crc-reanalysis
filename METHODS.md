@@ -32,8 +32,17 @@ are reported as reference only, never as the primary analysis.
 - Species abundance: MetaPhlAn marker sets mapped as a combined index.
   `t__SGB10068` = *E. coli* (96,300 bp / 122 fragments),
   `t__SGB10115` = *K. pneumoniae* (6,450 bp / 11 fragments).
-  Conversion: **313 reads per 1% per million reads** (`PER_PCT`), calibrated once and
-  then held fixed.
+  Conversion: **313 reads per 1% per million reads** (`PER_PCT`), calibrated once on
+  the *E. coli* marker set and then held fixed. Reads landing on a marker set scale
+  with **abundance x marker length**, so the constant is scaled per species by
+  `marker_bp / 96,300`: for *K. pneumoniae*'s 6,450 bp that is 20.96 reads per 1% per
+  million, not 313. Using 313 for both understates *K. pneumoniae* by
+  96,300 / 6,450 = **14.93x**, which is what the published column did until
+  2026-11-26 - see [CORRECTIONS.md](CORRECTIONS.md) item 17. The length scaling is an
+  **assumption** and is not validated for *K. pneumoniae*; it is used because applying
+  the *E. coli* constant to a 15x shorter marker set is not a conservative alternative
+  but wrong by a known factor.
+- Group comparisons of reads and abundance: two-sided Mann-Whitney U.
 - Carrier confirmation: six complete Enterobacteriaceae genomes in **one combined
   index**, so reads compete and cross-species bleed is removed by MAPQ 20
   (`pipeline/asm_genomes.sh`). Species: *E. coli* IHE3034, *K. pneumoniae* HS11286,
