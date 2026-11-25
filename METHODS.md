@@ -106,6 +106,59 @@ the FASTQ with `seqtk sample`, remapped, and recomputed breadth from the result.
   the time. This is why the breadth threshold and the gene threshold are applied
   together rather than the gene count alone.
 
+## How the calling criteria compare with Piccinno et al. 2025
+
+Piccinno et al. 2025 is the comparator in the README, so it matters how its calls are
+made. We looked, because we wanted to state the comparison honestly. **The two methods
+cannot be compared on sensitivity, because theirs does not have a number.**
+
+Their paper says only:
+
+> Anpan first filters samples to remove any without enough species-specific gene
+> coverage to accurately assess gene-level effects.
+
+No threshold is given there or anywhere else in the text. The rule is in the tool.
+From Anpan v.0.3.0 (`R/filtering.R`, `filter_with_kmeans`; defaults
+`filtering_method = "kmeans"`, `discard_poorly_covered_samples = TRUE`):
+
+- For each species and sample it computes `n_nz`, the number of gene families with
+  nonzero abundance, and `q50`, the median log abundance.
+- It then runs **2-means clustering** on those two standardised statistics and keeps
+  the samples that land in the "present" cluster. **The decision boundary is fitted to
+  whatever samples are in hand.**
+- If a reference-genomes file is supplied there is an additional hard floor on `n_nz`:
+  `mean(gene count) - 2 x SD(gene count)` when there are at least 5 genomes, otherwise
+  `(2/3) x mean(gene count)`. Samples below it are forced to "absent".
+- With more than 50,000 gene families, `n_nz` is `log1p`-transformed first.
+
+This is a reasonable design - it adapts to each species rather than imposing one
+number on all of them - but it has a consequence worth stating: **the same metagenome
+can be called differently depending on which other samples are in the study**, because
+the k-means centres move. A threshold like ours is cruder and almost certainly less
+sensitive, but it is a property of the sample. Theirs is a property of the dataset.
+
+For the same reason, "they called 3,741 samples and we called 397" is not a
+like-for-like statement, and we do not make it. What we claim is agreement of
+conclusions, not of methods.
+
+Three further things we could not resolve from their text, recorded so nobody repeats
+the search:
+
+- **Which genes.** The word "colibactin" appears exactly twice in the full text. The
+  specific UniRef90 gene families used for the colibactin result are not named; they
+  would be in Supplementary Table 9, which we have not opened.
+- **The significance threshold is stated three ways.** Methods, for the Anpan gene
+  model: "a significance threshold of an absolute coefficient of 2 and q < 0.05".
+  Results and the Fig. 5a legend: "FDR global q < 0.05 and absolute coefficient
+  estimate >1". The colibactin sentence itself: "q > 0.01 and abs(coefficient
+  estimate) < 1". The first two are criteria for calling something significant; the
+  third is the bound reported for a null.
+- **How close the colibactin result was.** Their null does hold under their own rule,
+  because `abs(coefficient) < 1` fails a criterion that requires it to exceed 1 (or 2,
+  per Methods). But `q > 0.01` corresponds to no threshold used anywhere else in the
+  paper, and **the actual q value and coefficient are never reported**, so the distance
+  from significance cannot be read off. We rely on their conclusion, not on a number.
+
 ## Statistics
 
 - Per cohort: Fisher's exact test, two-sided (own implementation, `fisher()` in

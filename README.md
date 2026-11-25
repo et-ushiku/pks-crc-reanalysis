@@ -20,6 +20,12 @@ Piccinno et al. 2025 (*Nat Med*, 18 cohorts, 3,741 samples), which reports:
 A result that does not reach significance at 3,741 samples will not reach it at 397.
 **This is not evidence that there is no effect; it is evidence that any effect is small.**
 
+The agreement is one of conclusions, not of methods. Their calls come from Anpan's
+gene model, whose sample filter is a per-species k-means boundary fitted to the data
+rather than a fixed threshold, so the two analyses cannot be compared on sensitivity
+and we do not try. [METHODS.md](METHODS.md) sets out what their criterion actually is
+and the three things about it we could not resolve from their text.
+
 **This is not a diagnostic test and must not be used for clinical decisions.**
 
 ---
