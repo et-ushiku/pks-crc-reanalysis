@@ -370,10 +370,47 @@ the pitfall is about. A reader could not have caught this, and neither could we 
 we tried. `data/per_sample.tsv` now carries an `island_reads` column, and
 `code/make_table.py` documents what it is.
 
-**What we did not do.** Three figures remain unverifiable from the shipped data
-because the inputs are not here: the ~1.9x ratio decomposition, the DE-CRC
-between-group depth difference (P = 1.5e-14), and the earlier regression whose odds
-ratio moved from 3.11 to 1.31. They are flagged in place rather than removed.
+**What we did not do at the time.** Three figures were left unverifiable because
+their inputs were not here: the ~1.9x ratio decomposition, the DE-CRC between-group
+depth difference (P = 1.5e-14), and the earlier regression whose odds ratio moved
+after adjusting for depth. All three turned out to be computable once `island_reads`
+was shipped, and `code/verify_extra.py` now does so. See item 14.
+
+---
+
+## 14. The three "unverifiable" figures were verifiable, and one of them was wrong
+
+Item 13 ended by saying three figures could not be checked from the shipped data and
+would be flagged in place. That was the wrong call: with `island_reads` shipped, all
+three are computable, and `code/verify_extra.py` computes them. Leaving a number in a
+document with a note saying nobody can check it is not much better than leaving it
+wrong.
+
+**Two reproduced exactly.**
+
+- The DE-CRC depth difference: medians 69.5M and 34.9M reads, Mann-Whitney
+  **P = 1.51e-14** against the published 1.5e-14.
+- The ratio decomposition: 55140/49455 = **1.1150** for the length convention, and
+  **1.1434** for marker fragment edge loss from a mean fragment of 789.3 bp at a
+  100 bp read. The third factor, ~1.50, is **not an independent measurement** - it is
+  the residual after dividing the observed ratio by the other two, and the script now
+  says so where the document implied three measured components.
+
+**One was wrong.** PITFALLS.md said that adjusting for sequencing depth moved the
+AT-CRC odds ratio "from 3.11 to 1.31 and P from 0.080 to 0.71". Recomputed, the
+unadjusted model gives **OR 3.11, P = 0.0798** - exactly as published - but adding
+log10(total reads) gives **OR 1.78, P = 0.4033**, not 1.31 and 0.71. Depth itself is
+significant at P = 0.0103. The 1.31 figure came from a third model with a further
+covariate whose specification was never recorded, so it is dropped rather than
+reconstructed. The point the paragraph makes is unaffected and arguably clearer: one
+covariate halves the odds ratio and takes P from 0.08 to 0.40.
+
+**The R values shifted slightly**, because `island_reads` is the pre-MAPQ count from
+the bowtie2 log while the published figures used MAPQ-filtered reads. DE-CRC's eight
+*E. coli*-consistent positives are **R 1.43-2.12, median 1.91** rather than 1.37-2.01,
+and the *Klebsiella* outlier is **764** rather than 723. Both versions are stated
+where they appear, and the conclusions - a tight cluster near 1.9 and one sample two
+and a half orders of magnitude away - do not move.
 
 ---
 

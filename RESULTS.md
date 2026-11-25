@@ -113,15 +113,19 @@ carries one copy".
 
 ### DE-CRC, all 9 positives
 
-Eight are consistent with *E. coli* (R 1.37-2.01, which after dividing out the ~1.9x
+Eight are consistent with *E. coli* (R 1.43-2.12, median 1.91, which after dividing
+out the ~1.9x
 offset is 0.72-1.06, i.e. one island per genome). One is not:
 
 | Sample | Group | Breadth | Genes | Best fit | R |
 |---|---|---|---|---|---|
-| **n_CCMD39882286ST** | **control** | 0.778 | 16/18 | ***K. pneumoniae*** | 0.79 (*E. coli*: **723**) |
+| **n_CCMD39882286ST** | **control** | 0.778 | 16/18 | ***K. pneumoniae*** | 0.79 (*E. coli*: **764**) |
 
-An *E. coli* R of 723 means *E. coli* cannot account for the island by a factor of
-700; the ~1.9x calibration offset is irrelevant at that scale.
+An *E. coli* R in the hundreds means *E. coli* cannot account for the island by that
+factor; the ~1.9x calibration offset is irrelevant at that scale. Recomputed from the
+shipped columns it is **764**; the figure originally published here was 723, from
+MAPQ-filtered island reads that were not shipped. Both are reproduced by
+`python3 code/verify_extra.py`, which also recomputes every other R in this table.
 
 ### CN-CRC, all 14 positives measured against six complete genomes
 
@@ -203,7 +207,7 @@ the 9.
 | ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) |
 | ***K. pneumoniae***, *E. coli* excluded by coverage | 2 | `n_ERR1018237` (CN control), `n_CCMD39882286ST` (DE control) |
 | **Undetermined** (six-genome subset only) | 4 | `cancer_ERR1018219`, `n_ERR1018236`, `n_ERR1018238`, `n_ERR1018240` |
-| *E. coli* by marker ratio, DE-CRC (R 1.37-2.01, i.e. 0.72-1.06 after the ~1.9x offset) | 8 | the other 8 DE-CRC positives |
+| *E. coli* by marker ratio, DE-CRC (R 1.43-2.12, i.e. ~0.75-1.11 after the ~1.9x offset) | 8 | the other 8 DE-CRC positives |
 
 - **Only one sample is confirmed by assembly**: `cancer_ERR1018186`, where the island
   and the *Klebsiella* chromosome appear on a single contig. The other two *Klebsiella*

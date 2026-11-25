@@ -113,8 +113,9 @@ backwards twice. What is left is a set of measurements:
    with breadth below 0.1 and at least 50 reads mapped, the median is **260 reads**
    (maximum 10,548) at a median breadth of 0.0018.
 3. **A marker-gene density ratio carries a ~1.9x systematic offset**, decomposed as
-   1.115 x 1.14 x ~1.50. Usable for exclusion, not attribution. This is the only one
-   of the four for which we found no published antecedent.
+   1.115 (= 55140/49455) x 1.14 (marker fragment edge loss) x ~1.50 (residual). Usable
+   for exclusion, not attribution. This is the only one of the four for which we found
+   no published antecedent.
 4. **Breadth is depth-limited below ~10x island coverage**; 29 of the 42 positive
    samples sat below it. In one cohort the between-group depth difference is P = 1.5e-14, so
    calling on raw data would find more carriers in the cancer group for a purely
@@ -138,6 +139,8 @@ ships the depth histograms (753 KB) instead of the reads:
 python3 code/analyse.py          # pure stdlib, no scipy, under a second
 python3 code/verify_rarefy.py    # checks the analytic rarefaction against
                                  # actually rarefied reads (5 runs, 2 samples)
+python3 code/verify_extra.py     # recomputes the three figures in PITFALLS.md
+                                 # that used to be uncheckable from this repo
 ```
 
 This recomputes breadth from `data/depth_hist.tsv`, checks it against the stored
@@ -166,6 +169,7 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
+| `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset and the depth-adjusted regression - the three figures that were previously unverifiable |
 | `data/rarefy_check_hist.tsv` | Depth histograms from 5 runs where the FASTQ really was subsampled and remapped |
 | `code/make_table.py`, `code/make_dup_table.py` | How `data/` was generated from BAM depth |
 | `pipeline/` | The mapping and download scripts, for anyone starting from FASTQ |

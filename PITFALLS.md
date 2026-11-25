@@ -203,7 +203,7 @@ near **1.9**. The offset decomposes as:
 
 | Factor | Size | Cause |
 |---|---|---|
-| Length convention | 1.115 | reads counted over 55,140 bp, divided by 49,455 bp |
+| Length convention | 1.115 | reads counted over 55,140 bp, divided by 49,455 bp (= 55140/49455, exact) |
 | Marker edge loss | 1.14 | fragments lose coverage at their ends; the island does not |
 | Residual mappability | ~1.50 | marker sequence is not as mappable as island sequence |
 
@@ -214,7 +214,7 @@ The product is ~1.9. It was stable across read lengths of 84, 94 and 100 bp.
 - **R is not a population fraction.** Do not say "40% of the *E. coli* carries it".
 - The only inference that survives the offset is the one-sided one: **R >> 1 means
   that species cannot account for the island**, because a 700-fold gap is not a 5%
-  calibration error. In one sample R was 723 for *E. coli* and 0.79 for
+  calibration error. In one sample R was 764 for *E. coli* and 0.79 for
   *K. pneumoniae*; that conclusion is robust to the offset.
 - Conversely, R near 1 for a species is *consistent with* carriage, not proof of it.
   In one of our samples *K. pneumoniae* was present at 16.7x with 0.94 genome breadth
@@ -248,7 +248,13 @@ Mann-Whitney P = 1.5e-14
 Calling carriage on the raw data would find more carriers in the cancer group for a
 purely technical reason. In an earlier phase of this work, a logistic regression on a
 different cohort showed exactly that: adding read depth as a covariate moved the odds
-ratio from 3.11 to 1.31 and P from 0.080 to 0.71.
+ratio from **3.11 to 1.78** and P from **0.080 to 0.40**, with depth itself
+significant at **P = 0.010**. Run `python3 code/verify_extra.py` to reproduce that,
+the depth split above, and the ratio decomposition below; all three were unverifiable
+from this repository until `island_reads` was shipped (CORRECTIONS.md items 13-14).
+An earlier version of this paragraph gave the adjusted odds ratio as 1.31 and
+P as 0.71, from a third model whose specification was not recorded; it is dropped
+rather than reconstructed.
 
 ### This principle is established; the threshold for this island is not
 
