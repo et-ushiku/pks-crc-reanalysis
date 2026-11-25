@@ -274,6 +274,33 @@ item 4 row were rewritten accordingly.
 
 ---
 
+## 11. We predicted the duplication would be visible in someone else's correlation matrix
+
+**What we said**, in the paragraph added with item 10: that omitting a mapping-quality
+filter "does make their per-gene RPKM values for those two genes arbitrary, which
+matters for the gene-to-gene correlation matrix they use to argue the island travels
+intact". A testable prediction: *clbJ* and *clbK* should correlate worse than other
+*clb* pairs in Nooij et al.'s Supplementary Figure 1.
+
+**Why it was wrong.** We extracted that figure from the PDF and read it. ***clbJ* vs
+*clbK* = 0.92**, which is in the middle of the range for *clb* pairs in the same matrix
+(roughly 0.79 to 0.99 excluding *clbS*). There is no detectable degradation.
+
+**Root cause.** We reasoned about the ambiguous region without weighing it against the
+gene. The repeat is 1,287 bp inside genes of 6,465 and 6,501 bp - about a fifth. The
+other four fifths are unique and dominate the per-gene RPKM, and arbitrary
+apportionment of the ambiguous reads averages out across a library. The effect we
+predicted is real in principle and negligible in size.
+
+**What this means.** Taken with item 10, the duplication leaves **no trace at all** in
+a read-count method: not in the summed abundance, and not in the gene-to-gene
+correlations. It is a problem exclusively for coverage-based calling. Our pitfall 1
+is a warning to people doing what we did, and we have now been wrong about its
+consequences for other people's methods twice, in the same direction - assuming our
+own method's failure mode must be everyone's.
+
+---
+
 ## What did not change
 
 No pre-specified threshold was altered at any point after results were seen:

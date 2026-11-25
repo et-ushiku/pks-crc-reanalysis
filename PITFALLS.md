@@ -345,9 +345,53 @@ near the limit of detection" - which is item 4 by another name.
 
 **What is missing is item 1 only**: no mapping-quality filter and no mention of the
 *clbJ*/*clbK* repeat. Per the correction above, that costs their headline quantity
-almost nothing. It does make their per-gene RPKM values for those two genes
-arbitrary, which matters for the gene-to-gene correlation matrix they use to argue the
-island travels intact.
+almost nothing.
+
+We predicted it would at least show up in the gene-to-gene correlation matrix they use
+to argue the island travels intact, since the repeat's reads are apportioned
+arbitrarily between those two genes. **We checked, and it does not.** Their
+Supplementary Figure 1 gives ***clbJ* vs *clbK* = 0.92**, squarely inside the ordinary
+range for *clb* pairs in that matrix (about 0.79 to 0.99, excluding *clbS*, which is an
+outlier throughout at 0.54-0.94). The reason is plain in hindsight: the ambiguous
+1,287 bp is only about a fifth of each 6.5 kb gene, the other four fifths are unique,
+and arbitrary apportionment averages out over many reads. So the duplication leaves no
+trace in their analysis at all. See [CORRECTIONS.md](CORRECTIONS.md) item 11.
+
+### What their Supplementary Figure 1 does show
+
+Reading the same matrix for a different purpose turned up something that bears on the
+attribution question above. Correlations of RPKM across their metagenomes:
+
+| Pair | Spearman r |
+|---|---|
+| *clb* gene vs *clb* gene | ~0.79 to 0.99 (excluding *clbS*) |
+| The three *E. coli* single-copy markers vs each other | 0.87, 0.87, 0.99 |
+| Flanking mobile elements (IS1400 transposases, *intP4*) vs the *E. coli* markers | 0.47 to 0.76 |
+| **The 19 *clb* genes vs the three *E. coli* markers** | **median +0.02 over 57 pairs; 24 of the 57 are negative** |
+
+**In their own data, *pks* abundance does not track *E. coli* abundance** - while the
+mobile elements sitting in the same reference region do track it, as generic *E. coli*
+content should. Their text reports the same thing for one donor: *pks* "correlated
+loosely with the relative abundance of *E coli* (Spearman's r = 0.43, P = .11)".
+
+This is **not** proof of a non-*E. coli* carrier. If only one of several co-resident
+*E. coli* strains carries the island, *pks* tracks that strain rather than total
+*E. coli*, and the correlation collapses just the same - which is the conventional
+reading and may well be right. The point is narrower: the figure offered in support of
+the island travelling intact is **neutral at best on who carries it**, and the question
+is settled by measuring the candidate genomes, which is cheap.
+
+(Numbers in the table above were read off the published figure image, not from
+underlying data, so treat the individual cells as approximate.)
+
+### One typo, recorded because it is checkable
+
+Their Figure 1 and Supplementary Figure 1 legends both give the island reference as
+**AM227896**. That accession is *Paracentrotus lividus* EST clone MPMGp1174L157Q, a
+771 bp sea urchin mRNA. The Methods give the correct **AM229678** (*E. coli* IHE3034
+colibactin cluster, 55,140 bp) in all four places it appears, so this is a legend
+typo and not a methodological error. We note it only because anyone following the
+figure legend to the reference will not find an island there.
 
 ### Where our data disagrees with them
 
