@@ -142,6 +142,13 @@ Reference: *E. coli* IHE3034 *pks* island, GenBank **AM229678.1** (55,140 bp).
   (16.7x and **109x** genome depth, breadth >0.88) where the island nonetheless tracks
   *E. coli*. We initially read the 109x sample as *Klebsiella* on abundance alone and
   were wrong (CORRECTIONS.md item 8).
+- **We detect sequence, not function.** Auvray et al. 2021 found that **16 of 109**
+  *pks*-positive *E. coli* strains (15%) had lost genotoxicity through mutations in
+  *clbB* or *clbD* or a *clbJK* fusion, while mostly still producing small amounts of
+  island-derived metabolites. A metagenomic positive call means the genes are present,
+  not that colibactin is made. Nothing in this analysis can distinguish a functional
+  island from a broken one, and a 15% inactive fraction would dilute any real
+  association toward the null.
 - **No wet-lab work.** No isolates, no PCR, no colibactin measurement.
 - One operator, one analysis, no independent replication of the code.
 
