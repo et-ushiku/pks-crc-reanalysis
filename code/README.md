@@ -10,6 +10,7 @@ Python 3, standard library only. No arguments needed unless shown.
 | `verify_extra.py` | Seven checks that each used to be impossible from `data/` alone: the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `verify_rarefy.py` | Checks the analytic rarefying formula against actual subsampling, and that the disagreement is smaller than the seed-to-seed spread |
 | `verify_numbers.py` | Recomputes 84 of the numbers written in the prose - breadth ceiling, duplication cost, background, carrier ratios, the DE-CRC depth confound, the *K. pneumoniae* abundance column and both sensitivity tables - and exits non-zero if any disagrees |
+| `verify_marker_scaling.py` | Tests the one assumption behind the abundance columns - that marker reads scale with marker length - against the six-genome index, which does not involve marker length. Asserts the interval contains 1 and excludes the unscaled alternative |
 
 ```
 python3 code/analyse.py            # default target 20,000,000 reads
@@ -17,6 +18,7 @@ python3 code/analyse.py 10000000   # try a different common depth
 python3 code/verify_extra.py
 python3 code/verify_rarefy.py
 python3 code/verify_numbers.py
+python3 code/verify_marker_scaling.py
 ```
 
 `analyse.py` asserts that the calls recomputed from `data/depth_hist.tsv` match the
@@ -62,6 +64,7 @@ are visible rather than buried in the file.
 | `make_kleborate_table.py` | `data/kleborate/*` - the typing output of both runs, plus the contig assignment behind it |
 | `make_clb_in_genomes.py` | `data/clb_in_six_genomes.tsv` - which reference genomes carry a *clb* island of their own |
 | `make_backbone_table.py` | `data/kleborate/island_contig_backbone.tsv`, `data/kleborate/contig_depth.tsv` - each island contig's non-island portion and its coverage depth |
+| `make_marker_table.py` | `data/marker_counts.tsv` - raw marker read counts per sample per SGB, which the abundance columns are computed from and which were not shipped before |
 
 `make_clb_in_genomes.py` is the exception to "will not run here": it needs only an
 island FASTA, `data/clb_genes.bed` and the six-genome FASTA, and does exact 40-mer

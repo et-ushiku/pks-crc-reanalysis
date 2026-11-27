@@ -163,10 +163,12 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
 | `code/verify_numbers.py` | 文書に書いた数字 84 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
+| `code/verify_marker_scaling.py` | 量の列が置いている唯一の仮定（目印の長さに比例する）を、長さを使わない別の索引で測って検証する |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
 | `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別、島の contig が本当にそのゲノムのものかを計算し直す |
 | `code/verify_repeat.py` | AM229678.1 を ENA から取って重複を測り直す。**唯一ネットワークが要る**スクリプト |
 | `data/carrier_six_genomes.tsv` | 担い手の表の元データ。検体ごと・種ごとの覆われた塩基数と深さの総和 |
+| `data/marker_counts.tsv` | 目印に当たった生の本数（検体ごと・SGB ごと）と、目印の総塩基・断片数。量の列の計算元で、長さ比例の検証に要る |
 | `data/assembly_alignment.tsv`、`data/assembly_junction_depth.tsv` | *Klebsiella* の染色体と島を両方載せたコンティグと、その接合部の読み取りの深さ |
 | `data/kleborate/` | アセンブルで確認した *K. pneumoniae* 担い手の Kleborate 型別。2 回の実行の両方、どの contig がどの袋に入ったか・なぜそうなったか、島の contig の島以外の部分と被覆深さ |
 | `data/clb_in_six_genomes.tsv` | 6 種の参照ゲノムのうちどれが *clb* 島を自分で持っているか（完全一致 40-mer）。contig の種への割り振りを読むのに要る |

@@ -173,10 +173,12 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
 | `code/verify_numbers.py` | Recomputes 84 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
+| `code/verify_marker_scaling.py` | Measures the one assumption behind the abundance columns against an independent index that does not use marker length |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
 | `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `code/verify_repeat.py` | Fetches AM229678.1 from ENA and recomputes the duplication - the only script here that needs network access |
 | `data/carrier_six_genomes.tsv` | The six-genome measurement behind the carrier table: covered bases and summed depth per species per sample |
+| `data/marker_counts.tsv` | Raw marker read counts per sample per SGB, with each marker set's length and fragment count - what the abundance columns are computed from, and what the length-scaling check needs |
 | `data/assembly_alignment.tsv`, `data/assembly_junction_depth.tsv` | The contig that carries both the *Klebsiella* chromosome and the island, and the read depth across their junction |
 | `data/kleborate/` | The Kleborate typing of the one assembly-confirmed *K. pneumoniae* carrier, both runs, which contig went in which bin and why, and each island contig's non-island portion and coverage depth |
 | `data/clb_in_six_genomes.tsv` | Which of the six reference genomes carry a *clb* island of their own, by exact 40-mer sharing - needed to read the contig assignment |

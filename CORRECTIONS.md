@@ -617,6 +617,16 @@ The project's own working script `meta/cn_entero.py` had the scaling from the st
 unvalidated assumption for *Klebsiella*. Only the published column lacked it, and
 nothing compared the two.
 
+**That assumption has since been measured and holds** (2026-11-28,
+`code/verify_marker_scaling.py`): the six-genome index measures the same species
+without reference to marker length, and the multiplier relating marker density to
+genome density is the same for both marker sets - *K. pneumoniae* / *E. coli* = 0.929,
+95% CI 0.662-1.304, against 14.93 if the scaling were wrong. The interval contains 1
+and excludes 14.93 by a factor of 11. It spans a factor of 2.0, so the column is
+trustworthy to about that coarseness and no further. `data/marker_counts.tsv` ships
+the raw marker read counts this needs; they had never been shipped, which is why the
+assumption could not be checked by a reader before now.
+
 | | published until 2026-11-26 | corrected |
 |---|---|---|
 | median of detected samples | 0.0010% | **0.0143%** |

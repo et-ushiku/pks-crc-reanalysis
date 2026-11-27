@@ -38,10 +38,28 @@ are reported as reference only, never as the primary analysis.
   `marker_bp / 96,300`: for *K. pneumoniae*'s 6,450 bp that is 20.96 reads per 1% per
   million, not 313. Using 313 for both understates *K. pneumoniae* by
   96,300 / 6,450 = **14.93x**, which is what the published column did until
-  2026-11-26 - see [CORRECTIONS.md](CORRECTIONS.md) item 17. The length scaling is an
-  **assumption** and is not validated for *K. pneumoniae*; it is used because applying
-  the *E. coli* constant to a 15x shorter marker set is not a conservative alternative
-  but wrong by a known factor.
+  2026-11-26 - see [CORRECTIONS.md](CORRECTIONS.md) item 17.
+- Whether that length scaling is right was **measured, not assumed**
+  (`code/verify_marker_scaling.py`). The six-genome competitive index measures the same
+  two species in the same samples by a route that does not involve marker length, so
+  each species' marker read density per effective marker base can be compared with its
+  own genome's read density per base. The length scaling requires that this multiplier
+  be **the same for both species**. Over the 5 samples where both genomes are covered
+  at breadth >= 0.7 it is: *K. pneumoniae* / *E. coli* = **0.929, 95% CI 0.662-1.304**,
+  against **14.93** if the scaling should not have been applied. The interval contains
+  1 and excludes 14.93 by a factor of 11. The multipliers themselves are near 1 for
+  both species once the end-to-end edge loss is accounted for (*E. coli* 0.92-1.23,
+  *K. pneumoniae* 0.83-1.27), which is the physical reason the scaling holds: the
+  marker sets recruit reads at about the rate their own genome does. **The interval
+  spans a factor of 2.0**, so the scaling is confirmed only to that coarseness - this
+  column must not be used to argue a two-fold difference - and it is confirmed only
+  for these two marker sets, in CN-CRC, in 5 samples.
+- Marker edge loss: `bowtie2` is end-to-end, so a read overhanging a marker fragment
+  loses its alignment; the effective marker length is `marker_bp - fragments x
+  (read_len - 1)`. The two sets differ here (122 fragments over 96,300 bp against 11
+  over 6,450 bp), and including the term moves the multiplier ratio from 0.886 to
+  0.929. The conclusion does not depend on the read length: at 84, 94 and 100 bp the
+  ratio is 0.924, 0.929, 0.933.
 - Group comparisons of reads and abundance: two-sided Mann-Whitney U.
 - Carrier confirmation: six complete Enterobacteriaceae genomes in **one combined
   index**, so reads compete and cross-species bleed is removed by MAPQ 20

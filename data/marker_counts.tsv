@@ -1,0 +1,56 @@
+sample	sgb	species	reads_no_mapq	reads_mapq20	marker_bp	marker_fragments
+cancer_ERR1018213	t__SGB10068	Escherichia coli	38889	35941	96300	122
+cancer_ERR1018213	t__SGB10115	Klebsiella pneumoniae	13	13	6450	11
+cancer_ERR1018213	t__SGB10079	Citrobacter koseri	1388	69	279700	NA
+cancer_ERR1018213	t__SGB10116	Klebsiella aerogenes	153	3	138200	NA
+cancer_ERR1018213	t__SGB165717	Klebsiella aerogenes (2nd SGB)	147	6	282850	NA
+cancer_ERR1018219	t__SGB10068	Escherichia coli	13152	12418	96300	122
+cancer_ERR1018219	t__SGB10115	Klebsiella pneumoniae	414	381	6450	11
+cancer_ERR1018219	t__SGB10079	Citrobacter koseri	396	20	279700	NA
+cancer_ERR1018219	t__SGB10116	Klebsiella aerogenes	426	56	138200	NA
+cancer_ERR1018219	t__SGB165717	Klebsiella aerogenes (2nd SGB)	212	4	282850	NA
+cancer_ERR1018224	t__SGB10068	Escherichia coli	22926	21732	96300	122
+cancer_ERR1018224	t__SGB10115	Klebsiella pneumoniae	0	0	6450	11
+cancer_ERR1018224	t__SGB10079	Citrobacter koseri	637	21	279700	NA
+cancer_ERR1018224	t__SGB10116	Klebsiella aerogenes	66	3	138200	NA
+cancer_ERR1018224	t__SGB165717	Klebsiella aerogenes (2nd SGB)	58	3	282850	NA
+cancer_ERR1018229	t__SGB10068	Escherichia coli	2777	2593	96300	122
+cancer_ERR1018229	t__SGB10115	Klebsiella pneumoniae	59	53	6450	11
+cancer_ERR1018229	t__SGB10079	Citrobacter koseri	157	7	279700	NA
+cancer_ERR1018229	t__SGB10116	Klebsiella aerogenes	115	3	138200	NA
+cancer_ERR1018229	t__SGB165717	Klebsiella aerogenes (2nd SGB)	60	5	282850	NA
+cancer_ERR1018282	t__SGB10068	Escherichia coli	3170	2911	96300	122
+cancer_ERR1018282	t__SGB10115	Klebsiella pneumoniae	8150	7823	6450	11
+cancer_ERR1018282	t__SGB10079	Citrobacter koseri	1970	114	279700	NA
+cancer_ERR1018282	t__SGB10116	Klebsiella aerogenes	5808	295	138200	NA
+cancer_ERR1018282	t__SGB165717	Klebsiella aerogenes (2nd SGB)	3036	198	282850	NA
+cancer_ERR1018307	t__SGB10068	Escherichia coli	234449	217032	96300	122
+cancer_ERR1018307	t__SGB10115	Klebsiella pneumoniae	2	2	6450	11
+cancer_ERR1018307	t__SGB10079	Citrobacter koseri	6225	140	279700	NA
+cancer_ERR1018307	t__SGB10116	Klebsiella aerogenes	455	12	138200	NA
+cancer_ERR1018307	t__SGB165717	Klebsiella aerogenes (2nd SGB)	465	13	282850	NA
+n_ERR1018237	t__SGB10068	Escherichia coli	69021	64655	96300	122
+n_ERR1018237	t__SGB10115	Klebsiella pneumoniae	138	127	6450	11
+n_ERR1018237	t__SGB10079	Citrobacter koseri	1535	32	279700	NA
+n_ERR1018237	t__SGB10116	Klebsiella aerogenes	289	3	138200	NA
+n_ERR1018237	t__SGB165717	Klebsiella aerogenes (2nd SGB)	166	7	282850	NA
+n_ERR1018238	t__SGB10068	Escherichia coli	9319	8803	96300	122
+n_ERR1018238	t__SGB10115	Klebsiella pneumoniae	424	401	6450	11
+n_ERR1018238	t__SGB10079	Citrobacter koseri	313	8	279700	NA
+n_ERR1018238	t__SGB10116	Klebsiella aerogenes	457	14	138200	NA
+n_ERR1018238	t__SGB165717	Klebsiella aerogenes (2nd SGB)	210	4	282850	NA
+n_ERR1018240	t__SGB10068	Escherichia coli	4173	3902	96300	122
+n_ERR1018240	t__SGB10115	Klebsiella pneumoniae	216	201	6450	11
+n_ERR1018240	t__SGB10079	Citrobacter koseri	94	5	279700	NA
+n_ERR1018240	t__SGB10116	Klebsiella aerogenes	150	43	138200	NA
+n_ERR1018240	t__SGB165717	Klebsiella aerogenes (2nd SGB)	75	3	282850	NA
+n_ERR1018245	t__SGB10068	Escherichia coli	35763	33695	96300	122
+n_ERR1018245	t__SGB10115	Klebsiella pneumoniae	57	55	6450	11
+n_ERR1018245	t__SGB10079	Citrobacter koseri	890	46	279700	NA
+n_ERR1018245	t__SGB10116	Klebsiella aerogenes	180	11	138200	NA
+n_ERR1018245	t__SGB165717	Klebsiella aerogenes (2nd SGB)	133	9	282850	NA
+n_ERR1018246	t__SGB10068	Escherichia coli	8906	8161	96300	122
+n_ERR1018246	t__SGB10115	Klebsiella pneumoniae	3	3	6450	11
+n_ERR1018246	t__SGB10079	Citrobacter koseri	205	6	279700	NA
+n_ERR1018246	t__SGB10116	Klebsiella aerogenes	43	23	138200	NA
+n_ERR1018246	t__SGB165717	Klebsiella aerogenes (2nd SGB)	25	2	282850	NA
