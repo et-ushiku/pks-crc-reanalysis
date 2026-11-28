@@ -241,8 +241,20 @@ measured (`data/island_ratio_scale.tsv`, [CORRECTIONS.md](CORRECTIONS.md) item 8
 amendment): across the four samples where five of the six species are excluded at
 >= 100x it runs 0.278-1.026, so a value near 1 is where a fully-carrying population
 sits - but the band spans 3.7x on n = 4, and **there is no calibrator for *Klebsiella* at
-all**. Settling these two needs what settled `cancer_ERR1018186`: an assembly that puts
-the island on a chromosome. See [CLAIMS.md](CLAIMS.md) row 8.
+all**.
+
+**We then assembled `cancer_ERR1018282`, and the assembly does not settle it either.**
+Eight contigs hit the island reference; **four carry no *clb* gene base**, their hits
+falling entirely in the reference's 5,685 bp of non-island flanking sequence - and two
+of those four are the large *Klebsiella* chromosome contigs (185,848 bp at 91% Kp and
+39,109 bp at 98%). The four contigs that do carry genes are 1,278-2,056 bp at
+multiplicity 3-5, with no chromosome attached, covering 14.5% of the gene bases. There
+is no junction to read. The *Klebsiella* chromosome sits at multiplicity 83-91 and the
+island's fragments at 3-5, so the island is not in the bulk *Klebsiella* population and
+a *Klebsiella* explanation still needs a ~3% minority - which is what the ratio already
+said. `data/assembly_282_island.tsv`, [CORRECTIONS.md](CORRECTIONS.md) item 8, and
+[CLAIMS.md](CLAIMS.md) row 8. By the stricter standard these two samples belong in
+**undetermined**, which would make the "4 unassignable of 14" below **6 of 14**.
 
 ### Summary of carriers
 

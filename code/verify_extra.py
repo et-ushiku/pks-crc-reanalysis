@@ -767,6 +767,67 @@ def ratio_scale():
         "282's E. coli ratio should sit inside the calibrated band"
 
 
+def asm282():
+    print()
+    print("=" * 70)
+    print("12. cancer_ERR1018282, assembled: it does not settle item 8")
+    print("=" * 70)
+    print("   The reference is 55,140 bp of which the 18 clb genes are 49,431.")
+    print("   A contig can hit the other 5,685 bp - the non-island flanking")
+    print("   sequence - without carrying any island at all (PITFALLS item 2).")
+    print("   So every hit is split into gene bases and non-gene bases BEFORE")
+    print("   the species column is looked at. Two of the four contigs that")
+    print("   hit only the flanking sequence are the large Klebsiella contigs,")
+    print("   and counting them would have produced the answer we wanted.")
+    print()
+    rows = load("assembly_282_island.tsv")
+    print("   %-13s %9s %7s %9s %9s %-22s"
+          % ("contig", "bp", "multi", "island", "clb gene", "top species"))
+    for r in rows:
+        print("   %-13s %9s %7s %9s %9s %-22s %s"
+              % (r["contig"], r["contig_bp"], r["megahit_multi"],
+                 r["island_hit_bp"], r["island_gene_bp"],
+                 r["top_species"],
+                 "<- backbone only" if r["island_gene_bp"] == "0" else ""))
+    frag = [r for r in rows if r["verdict"] == "island_fragment"]
+    kpb = [r for r in rows if r["verdict"] == "kp_chromosome_backbone_only"]
+    none = [r for r in rows if r["island_gene_bp"] == "0"]
+    print()
+    print("   %d contigs carry clb genes, %d hit only the flanking sequence,"
+          % (len(frag), len(none)))
+    print("   and %d of those are Klebsiella chromosome." % len(kpb))
+    assert len(rows) == 8, "expected 8 island-hitting contigs"
+    assert len(frag) == 4 and len(none) == 4, \
+        "the gene/non-gene split should be 4 and 4"
+    assert len(kpb) == 2, "two Klebsiella chromosome contigs hit the backbone"
+    for r in kpb:
+        assert int(r["island_gene_bp"]) == 0, \
+            "%s must carry no gene base, or the conclusion changes" % r["contig"]
+        assert int(r["contig_bp"]) > 30000, "these are the long contigs"
+    fm = sorted(float(r["megahit_multi"]) for r in frag)
+    km = sorted(float(r["megahit_multi"]) for r in kpb)
+    print("   island fragments at multiplicity %.0f-%.0f, the Klebsiella"
+          % (fm[0], fm[-1]))
+    print("   chromosome at %.0f-%.0f. **The island is not in the bulk"
+          % (km[0], km[-1]))
+    print("   Klebsiella population** - if it were, its contigs would sit")
+    print("   near the chromosome's, and they sit more than tenfold below.")
+    print("   No percentage is read off these numbers: `multi` is a k=119")
+    print("   graph multiplicity, not a read depth, and section 10 showed it")
+    print("   misreporting one contig by a factor of 1.9. The size of the")
+    print("   minority comes from the depth ratio (1 cell in 37), not here.")
+    assert fm[-1] < km[0] / 10, \
+        "the island fragments must sit far below the chromosome"
+    fl = sorted(int(r["contig_bp"]) for r in frag)
+    print()
+    print("   The gene-carrying contigs are %d-%d bp with no chromosome on"
+          % (fl[0], fl[-1]))
+    print("   any of them, so **there is no junction to read and nothing can")
+    print("   be attributed.** Item 8 stays a C in CLAIMS.md.")
+    assert fl[-1] < 5000, \
+        "a long gene-carrying contig would mean a junction existed"
+
+
 def main():
     rows = load("per_sample.tsv")
     depth_difference(rows)
@@ -780,6 +841,7 @@ def main():
     island_locus()
     read_depth_and_links()
     ratio_scale()
+    asm282()
 
 
 if __name__ == "__main__":

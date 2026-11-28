@@ -164,7 +164,7 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | `data/missing_split.tsv` | 覆われなかった塩基を、重複の内と外に分けたもの |
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
-| `code/verify_numbers.py` | 文書に書いた数字 209 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
+| `code/verify_numbers.py` | 文書に書いた数字 245 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
 | `code/verify_claims_ledger.py` | CLAIMS.md の機械で見られるところを確かめる。どの行も「何を排除するか」が埋まっているか、等級が A〜D か、引いたファイルと訂正項目が実在するか。**正直かどうかは確かめられない** |
 | `code/verify_marker_scaling.py` | 量の列が置いている唯一の仮定（目印の長さに比例する）を、長さを使わない別の索引で測って検証する |
 | `data/kleborate/island_tiling.tsv` | 島が載った contig を島の参照の上に並べ、継ぎ目の重なりを出したもの |
@@ -172,6 +172,7 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | `data/kleborate/contig_read_depth.tsv` | 読み取りをアセンブル全体に貼り直して測った contig ごとの深さ。megahit の `multi` と並べてある |
 | `data/kleborate/contig_links.tsv` | 対の両端が別の contig に落ちた組の数。相手は割り振りのある contig だけ |
 | `data/island_ratio_scale.tsv` | 担体 14 件の 島/種 の深さの比。どの種が排除されるか、どの検体が比の目盛りを較正するか |
+| `data/assembly_282_island.tsv` | `cancer_ERR1018282` で島の参照に当たった contig 8 本。当たりを **clb 遺伝子の中と、島でない前後配列** に分けてある。この分け方をしないと Klebsiella の染色体 contig 2 本を担体と読んでしまう |
 | `data/mapq_split.tsv` | clb 遺伝子ごとの、MAPQ 20 で絞る前と後の本数。貼り付け総数と読み取り名の種類数（= 二重計上が無いこと）と、重複の 2 複製への積まれ方 |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
 | `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別、島の contig が本当にそのゲノムのものかを計算し直す |

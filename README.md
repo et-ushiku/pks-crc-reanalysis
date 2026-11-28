@@ -174,7 +174,7 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/missing_split.tsv` | Uncovered bases split inside/outside the duplication |
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
-| `code/verify_numbers.py` | Recomputes 209 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
+| `code/verify_numbers.py` | Recomputes 245 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
 | `code/verify_claims_ledger.py` | Checks the mechanical parts of CLAIMS.md: that every row's "what it excludes" column is filled, every grade is A-D, and every cited file and CORRECTIONS item exists. It cannot check whether a row is honest |
 | `code/verify_marker_scaling.py` | Measures the one assumption behind the abundance columns against an independent index that does not use marker length |
 | `data/kleborate/island_tiling.tsv` | The island contigs laid out on the island reference, with the overlap at each junction |
@@ -182,6 +182,7 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/kleborate/contig_read_depth.tsv` | Per-contig read depth from mapping the reads back to the whole assembly, beside megahit's `multi` |
 | `data/kleborate/contig_links.tsv` | Read pairs whose two mates land on different contigs, counted against assigned partners only |
 | `data/island_ratio_scale.tsv` | The island/species depth ratio for all 14 carriers, with which species are excluded, and which samples calibrate the ratio's scale |
+| `data/assembly_282_island.tsv` | The 8 contigs of `cancer_ERR1018282` that hit the island reference, with each hit split into *clb* gene bases and non-island flanking bases - the split that stops two *Klebsiella* chromosome contigs being read as carriers |
 | `data/mapq_split.tsv` | Reads per *clb* gene with and without the MAPQ 20 filter, the primary-vs-distinct-name counts that show no read is counted twice, and how the repeat's two copies fill |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
 | `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |

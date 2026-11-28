@@ -551,6 +551,81 @@ chk("期待の 94.6%（= 残り 5.4% の欠損）", 0.946,
 dm = sum(int(mq[g]["reads_mapq20"]) for g in ("clbJ", "clbK"))
 chk("MAPQ20 では期待の 77.3%", 0.773, (dm / float(db)) / rate, 0.0006)
 
+print("\n16. 282 のアセンブル  CORRECTIONS.md 8 番の追補")
+a2 = {r["contig"]: r for r in load("assembly_282_island.tsv")}
+chk("島の参照に当たった contig は 8 本", 8, len(a2))
+chk("clb 遺伝子を載せているのは 4 本", 4,
+    len([r for r in a2.values() if r["verdict"] == "island_fragment"]))
+chk("遺伝子の外だけなのは 4 本", 4,
+    len([r for r in a2.values() if r["island_gene_bp"] == "0"]))
+chk("そのうち Klebsiella 染色体は 2 本", 2,
+    len([r for r in a2.values()
+         if r["verdict"] == "kp_chromosome_backbone_only"]))
+for c, bp, mu, gene in (("k119_42126", 185848, 91.34, 0),
+                        ("k119_49689", 39109, 82.96, 0),
+                        ("k119_2268", 2056, 5.00, 3333),
+                        ("k119_77516", 1577, 4.00, 1577),
+                        ("k119_24080", 1483, 3.00, 1098),
+                        ("k119_58287", 1278, 3.00, 1156)):
+    chk("%s の長さ %d bp" % (c, bp), bp, int(a2[c]["contig_bp"]))
+    chk("%s の multi %.2f" % (c, mu), mu, float(a2[c]["megahit_multi"]), 0.005)
+    chk("%s の clb 遺伝子 %d bp" % (c, gene), gene,
+        int(a2[c]["island_gene_bp"]))
+chk("k119_42126 は Kp の 91%", 0.914,
+    float(a2["k119_42126"]["top_species_pct_of_contig"]), 0.0006)
+chk("k119_49689 は Kp の 98%", 0.975,
+    float(a2["k119_49689"]["top_species_pct_of_contig"]), 0.0006)
+fm = sorted(float(r["megahit_multi"]) for r in a2.values()
+            if r["verdict"] == "island_fragment")
+km = sorted(float(r["megahit_multi"]) for r in a2.values()
+            if r["verdict"] == "kp_chromosome_backbone_only")
+chk("島の断片の multi は 3-5", (3.0, 5.0), (fm[0], fm[-1]))
+chk("Klebsiella 染色体の multi は 83-91", (83.0, 91.0),
+    (round(km[0]), round(km[-1])))
+fl = sorted(int(r["contig_bp"]) for r in a2.values()
+            if r["verdict"] == "island_fragment")
+chk("遺伝子を載せた contig は 1,278-2,056 bp", (1278, 2056), (fl[0], fl[-1]))
+chk("覆った遺伝子塩基は 7,164 bp", 7164,
+    sum(int(r["island_gene_bp"]) for r in a2.values()))
+chk("それは 49,431 bp の 14.5%", 0.145,
+    sum(int(r["island_gene_bp"]) for r in a2.values()) / 49431.0, 0.0006)
+# PITFALLS 1 番の三度目。**配り物の座標から** 重複を復元する。
+# 1 つの contig 区間が参照の 2 か所に当たっているので、その共有区間を
+# それぞれの当たりを通して参照へ戻すと、重複の 2 つの複製が出てくる
+sp = [t.split("/") for t in
+      a2["k119_2268"]["island_spans_over_contig_spans"].split(";")]
+H = []
+for isl, ctg in sp:
+    i1, i2 = (int(x) for x in isl.split("-"))
+    c1, c2 = (int(x) for x in ctg.split("-"))
+    H.append((i1, i2, c1, c2))
+chk("k119_2268 の当たりは 2 つ", 2, len(H))
+lo = max(min(c1, c2) for _, _, c1, c2 in H)
+hi = min(max(c1, c2) for _, _, c1, c2 in H)
+chk("2 つが共有する contig 区間は 1,287 bp", 1287, hi - lo + 1)
+
+
+def to_island(i1, i2, c1, c2, pos):
+    """contig 座標 pos を、この当たりを通して参照の座標に戻す。
+
+    BLAST は問い合わせ側と対象側の開始同士が対応する形で出すので、
+    参照の i1 が contig の c1 に対応する。contig 側が逆向き（c2 < c1）なら
+    contig を 1 進めると参照は 1 戻る。
+    """
+    step = 1 if c2 >= c1 else -1
+    return i1 + (pos - c1) * step
+
+
+ends = sorted(sorted((to_island(*h, pos=lo), to_island(*h, pos=hi)))
+              for h in H)
+chk("復元した 2 つの複製は 16,066-17,352 と 21,719-23,005",
+    [[16066, 17352], [21719, 23005]], [list(e) for e in ends])
+chk("その長さはどちらも 1,287 bp", [1287, 1287],
+    [e[1] - e[0] + 1 for e in ends])
+chk("間隔は 5,653 bp", 5653, ends[1][0] - ends[0][0])
+chk("これは 30-mer 走査で測った重複と同じ（長さ）", DUP_BP // 2, 1287)
+chk("これは PITFALLS 1 番の開始と同じ", 16066, ends[0][0])
+
 print("\n%d 件を検算し、%d 件が不一致" % (NOK[0], len(BAD)))
 if BAD:
     for where, claim, got in BAD:

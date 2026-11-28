@@ -104,6 +104,16 @@ The assembler broke the island at exactly the two copies. That measurement share
 inputs with the k-mer scan above: see [CORRECTIONS.md](CORRECTIONS.md) item 16 and
 `data/kleborate/island_tiling.tsv`.
 
+**And a third time, in a second sample, to the base.** An independent megahit assembly
+of `cancer_ERR1018282` - a different sample, different depth, different dominant
+organism - collapsed the repeat into a single 2,056 bp contig (`k119_2268`). Its bases
+80-1366 are **1,287 bp** that align to AM229678.1 in **two** places: **16,066-17,352**
+and **21,719-23,005**, a spacing of **5,653 bp**. Those are the figures this item
+measured from the reference by exhaustive 30-mer scanning, with no assembly involved,
+and the figures CORRECTIONS item 9 corrected the interval to - reproduced without a
+single base of difference by a method that shares no input with the scan.
+`data/assembly_282_island.tsv`.
+
 We do not claim their figure is wrong. They worked from their own hybrid assemblies
 and may have measured in a different strain or under a different definition of
 "homologous". We report what is measurable in the reference everyone maps to. Anyone
