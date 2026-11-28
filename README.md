@@ -143,6 +143,7 @@ python3 code/verify_extra.py     # recomputes the figures that used to be
                                  # uncheckable: the depth split, the ratio offset,
                                  # the regression, the carrier table, the junction,
                                  # the strain typing, the island contigs
+python3 code/verify_claims_ledger.py  # checks CLAIMS.md's structure
 python3 code/verify_repeat.py    # recomputes the duplication from AM229678.1
                                  # (the only script that needs network)
 ```
@@ -167,17 +168,21 @@ different seeds at the same depth, and **all five calls agree**. See
 | [METHODS.md](METHODS.md) | Pipeline, reference, pre-specified thresholds, rarefaction derivation |
 | [PITFALLS.md](PITFALLS.md) | The four measurements above, what was already published about each, and a worked example in a published study |
 | [CORRECTIONS.md](CORRECTIONS.md) | Every claim we made and later had to withdraw, and why |
+| [CLAIMS.md](CLAIMS.md) | **What each claim rests on, and what that evidence rules out.** One row per load-bearing claim, graded A-D. The middle column is "what alternative does this exclude", because four of the corrections were a correct number that excluded nothing |
 | `data/depth_hist.tsv` | Per-sample, per-gene depth histograms - **the reproducible dataset** |
 | `data/per_sample.tsv` | 397 rows: total reads, **reads mapped to the island reference**, breadth, genes called, call, *E. coli* %, *K. pneumoniae* % (**NA where that species was never measured** - see CORRECTIONS.md item 7) |
 | `data/missing_split.tsv` | Uncovered bases split inside/outside the duplication |
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
-| `code/verify_numbers.py` | Recomputes 147 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
+| `code/verify_numbers.py` | Recomputes 209 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
+| `code/verify_claims_ledger.py` | Checks the mechanical parts of CLAIMS.md: that every row's "what it excludes" column is filled, every grade is A-D, and every cited file and CORRECTIONS item exists. It cannot check whether a row is honest |
 | `code/verify_marker_scaling.py` | Measures the one assumption behind the abundance columns against an independent index that does not use marker length |
 | `data/kleborate/island_tiling.tsv` | The island contigs laid out on the island reference, with the overlap at each junction |
 | `data/kleborate/island_locus.tsv` | The insertion containing the island, tiled on a reference ruler, with each contig's *Klebsiella* chromosome alignments |
 | `data/kleborate/contig_read_depth.tsv` | Per-contig read depth from mapping the reads back to the whole assembly, beside megahit's `multi` |
 | `data/kleborate/contig_links.tsv` | Read pairs whose two mates land on different contigs, counted against assigned partners only |
+| `data/island_ratio_scale.tsv` | The island/species depth ratio for all 14 carriers, with which species are excluded, and which samples calibrate the ratio's scale |
+| `data/mapq_split.tsv` | Reads per *clb* gene with and without the MAPQ 20 filter, the primary-vs-distinct-name counts that show no read is counted twice, and how the repeat's two copies fill |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
 | `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `code/verify_repeat.py` | Fetches AM229678.1 from ENA and recomputes the duplication - the only script here that needs network access |

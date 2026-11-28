@@ -158,6 +158,20 @@ The AM229678.1 reference is **55,140 bp**, but the 18 *clb* genes cover only
 **49,455 bp**. The remaining **5,685 bp** is intergenic sequence and flanking
 backbone, which is *not* island-specific.
 
+> **A smaller trap inside that number, which we fell into.** 49,455 is the sum of the
+> 18 interval lengths in the BED file, and four adjacent gene pairs overlap - *clbQ*/
+> *clbP* by 8 bp, *clbN*/*clbM* by 4, *clbL*/*clbK* by 8, *clbG*/*clbF* by 4. The
+> genes therefore cover **49,431 distinct bases**, not 49,455. Summing BED intervals
+> gives the total length of the features, not the number of bases they cover, and the
+> two differ by exactly the overlap - which adjacent genes in a compact operon
+> routinely have. A pipeline that takes its numerator from a per-base walk, where each
+> base is counted once, and its denominator from the interval sum, is using two
+> different definitions of the same target. Ours did, for every breadth in this
+> repository; the effect is at most 0.000952 of breadth and changes no call, which was
+> measured rather than assumed. See [CORRECTIONS.md](CORRECTIONS.md) item 18. **Check
+> it with `bedtools merge`, or by merging the intervals yourself, before using the sum
+> as a denominator.**
+
 Reads from ordinary, island-free *E. coli* land on that 5,685 bp. Among the **106
 samples** that were island-negative (breadth < 0.1) yet still had at least 50 reads
 mapped to the reference:

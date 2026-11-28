@@ -697,6 +697,76 @@ def read_depth_and_links():
     print("   of every contig in the bin.")
 
 
+def ratio_scale():
+    print()
+    print("=" * 70)
+    print("11. The scale of the island/species depth ratio, measured")
+    print("=" * 70)
+    print("   CORRECTIONS item 8 read this ratio as a population fraction")
+    print("   (\"0.85, i.e. ~85% of E. coli cells\"), which is item 3's mistake")
+    print("   on a different numerator. Item 3 measured R's offset; this")
+    print("   measures this ratio's. The selection rule was fixed first and")
+    print("   puts NO condition on the ratio - conditioning on it would pick")
+    print("   values near 1 and make the calibration circular.")
+    print()
+    rows = load("island_ratio_scale.tsv")
+    cal = [r for r in rows if r["calibrator_for"] == "Ecoli_IHE3034"]
+    kcal = [r for r in rows if r["calibrator_for"] == "Kpneumoniae_HS11286"]
+    print("   %-22s %9s %9s %9s %9s"
+          % ("calibrator for E. coli", "island", "E. coli", "isl/Ec", "rep.bias"))
+    for r in sorted(cal, key=lambda x: float(x["island_over_ecoli"])):
+        off = (float(r["island_depth_covered_only"]) / float(r["island_depth"]))
+        print("   %-22s %9.3f %9.3f %9.3f %9.4f"
+              % (r["sample"], float(r["island_depth"]),
+                 float(r["Ecoli_IHE3034"]), float(r["island_over_ecoli"]), off))
+    v = sorted(float(r["island_over_ecoli"]) for r in cal)
+    offs = [float(r["island_depth_covered_only"]) / float(r["island_depth"])
+            for r in cal]
+    print()
+    print("   %d samples calibrate E. coli; the band is %.3f-%.3f, a spread of"
+          % (len(cal), v[0], v[-1]))
+    print("   %.1fx. The ratio never passes %.3f where E. coli must be the"
+          % (v[-1] / v[0], v[-1]))
+    print("   carrier, so the scale is near 1 - R's offset was 1.9.")
+    print("   The repeat interior biases the island's depth down by %.3f-%.3fx,"
+          % (min(offs), max(offs)))
+    print("   so the one-copy-in-every-cell ceiling sits near %.2f."
+          % (v[-1] * sum(offs) / len(offs)))
+    assert len(cal) == 4, "expected 4 E. coli calibrators, got %d" % len(cal)
+    assert v[-1] < 1.05, "a calibrator above 1.05 would mean a real offset"
+    assert v[-1] / v[0] > 3.0, \
+        "a narrow band would mean the selection had been circular"
+    for o in offs:
+        assert 1.03 < o < 1.06, "repeat bias out of the measured range: %.4f" % o
+    print()
+    print("   **There is no calibrator for Klebsiella: %d samples.** The scale"
+          % len(kcal))
+    print("   of this ratio is measured for E. coli only, so reading a")
+    print("   Klebsiella ratio as copies per cell - the 1.30 in the item 16")
+    print("   amendment included - assumes the two genomes behave alike here.")
+    print("   Item 16 does not rest on it; its depth evidence was replaced.")
+    assert not kcal, "a Klebsiella calibrator would change what item 8 can say"
+    print()
+    e = [r for r in rows if r["sample"] == "cancer_ERR1018282"][0]
+    rk = float(e["island_over_kp"])
+    print("   cancer_ERR1018282: island %.3f, E. coli %.3f (ratio %.3f),"
+          % (float(e["island_depth"]), float(e["Ecoli_IHE3034"]),
+             float(e["island_over_ecoli"])))
+    print("   Kp %.3f (ratio %.4f = 1 cell in %.1f)."
+          % (float(e["Kpneumoniae_HS11286"]), rk, 1.0 / rk))
+    print("   Both fit: ~%.0f%% of a %.1fx E. coli population at one copy, or"
+          % (100 * float(e["island_over_ecoli"]), float(e["Ecoli_IHE3034"])))
+    print("   %.1f%% of a %.0fx Klebsiella population at one copy. **The ratio"
+          % (100 * rk, float(e["Kpneumoniae_HS11286"])))
+    print("   excludes neither.** 1 in %.0f is an ordinary frequency for a" % (1 / rk))
+    print("   mobile element, not an exclusion, and item 8 said \"1 in 33\" by")
+    print("   inverting the rounded 0.03.")
+    assert 1 / rk > 33.5, \
+        "if 1/ratio really were 33 the published figure would have been right"
+    assert float(e["island_over_ecoli"]) <= v[-1], \
+        "282's E. coli ratio should sit inside the calibrated band"
+
+
 def main():
     rows = load("per_sample.tsv")
     depth_difference(rows)
@@ -709,6 +779,7 @@ def main():
     island_tiling()
     island_locus()
     read_depth_and_links()
+    ratio_scale()
 
 
 if __name__ == "__main__":

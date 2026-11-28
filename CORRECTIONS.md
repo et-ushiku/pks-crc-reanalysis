@@ -20,12 +20,21 @@ promoted it to a derived constant. It was an observation, not a derivation.
 
 **What is actually derivable.** If both copies of the duplication are lost entirely,
 breadth is `(49455 - 2574) / 49455 = 0.9480`. (This paragraph originally said 1,248 bp
-and 0.9495; the repeat was later measured at 1,287 bp - see item 9.) Reads that happen to span a
+and 0.9495; the repeat was later measured at 1,287 bp - see item 9. The denominator
+49,455 is itself 24 bp too large, because four adjacent gene pairs overlap - see item
+18; against the 49,431 distinct bases the figure is 0.9479.) Reads that happen to span a
 position where the two copies differ (they are 99.840% identical, so 0.16% of
 positions) can still be placed, which lifts breadth above that figure by a
 sample-dependent amount. **The ceiling is not a fixed number.** The defensible
-statements are: 0.9495 is what you get if the duplication is lost completely, and no
+statements are: 0.9480 is what you get if the duplication is lost completely, and no
 sample in 397 exceeded 0.99.
+
+(That sentence said **0.9495** until 2026-11-28, four lines below the paragraph that
+had already been corrected to 0.9480 and three sections above item 9 saying in so many
+words "not 0.9495 as stated in item 1 of this file". The retraction was written and the
+sentence it retracted was left standing. Nothing turned on it - no sample in 397 falls
+in the 1.5-thousandth gap between the two values, so the counts in item 2 are the same
+either way, which is checked - but the file contradicted itself for three commits.)
 
 ---
 
@@ -183,6 +192,85 @@ to abundance-based attribution - the case where the pull of abundance is stronge
 the sample we removed from the *Klebsiella* side was never counted there in the final
 tally; what changed is that it is now positively assigned rather than left leaning.
 
+### Amended 2026-11-28: a depth ratio cannot say "85% of cells", and it does not exclude *Klebsiella*
+
+Two statements above claim more than a depth ratio can carry, and the first of them is
+item 3 of this file repeated.
+
+**"Ratio 0.85, i.e. ~85% of *E. coli* cells carrying one copy."** Item 3 is the
+correction where we read an uncalibrated ratio as a population fraction, found it was
+offset by 1.9x, and wrote that the ratio would from then on be used only for the
+one-sided inference. That was the marker-based ratio R. The ratio in item 8 is a
+different quantity - island read depth over that species' genome depth, both from the
+six-genome competitive index - and we read *it* as a population fraction five sections
+later. Same mistake, different numerator.
+
+So we measured its scale, the way item 3 measured R's offset
+(`code/make_ratio_scale.py`, `data/island_ratio_scale.tsv`). The rule was fixed before
+looking: a species is excluded as the carrier when island depth is >= **100x** its
+genome depth, and a **calibrator** is a sample where five of the six species are
+excluded, so the sixth is the carrier beyond doubt. **No condition is placed on the
+ratio itself** - conditioning on it would select values near 1 and make the calibration
+circular.
+
+Four samples calibrate *E. coli*:
+
+| sample | island depth | *E. coli* depth | island / *E. coli* | other five excluded |
+|---|---|---|---|---|
+| `cancer_ERR1018224` | 5.646 | 20.278 | **0.278** | yes |
+| `cancer_ERR1018213` | 54.509 | 63.859 | 0.854 | yes |
+| `cancer_ERR1018307` | 391.191 | 407.178 | 0.961 | yes |
+| `n_ERR1018246` | 14.129 | 13.775 | **1.026** | yes |
+
+**The scale is near 1, not 1.9.** The ratio never runs past 1.03 in a sample where
+*E. coli* must be the carrier, so unlike R this quantity has no large multiplicative
+offset. One offset in it is measurable and small: the island's depth is averaged over
+all 49,431 gene bases, including the ~2,000 in the repeat interior that MAPQ 20 can
+never cover, which biases it **down** by 1.041-1.046x in these four. Correcting only
+that, the ceiling for a population in which every cell carries one copy sits at about
+**1.07**.
+
+**But the band is 0.278-1.026 - a spread of 3.7x on n = 4.** 0.85 is 17% below the
+ceiling, and reading that 17% as "15% of cells do not carry it" needs a precision this
+measurement does not have. The 0.278 matters in the other direction: it shows the ratio
+does carry real information below 1 and is not all offset. **"~85% of cells" was never
+measurable, and is withdrawn.**
+
+**There is no calibrator for *Klebsiella*. Zero samples.** Not one of the 14 has
+*E. coli* and the other four excluded, so this ratio's scale is measured for *E. coli*
+only. Any reading of a *Klebsiella* ratio as copies per cell - including the 1.30 in
+the 2026-11-28 amendment to item 16 - is an assumption that two genomes behave alike
+under this measurement, not a measurement. Item 16's argument does not rest on it: its
+depth evidence was replaced by overlap, position and linkage precisely because depth
+could not carry the claim.
+
+**The second statement is the worse one. "Matches Kp not at all (ratio 0.03, i.e. 1 Kp
+cell in 33)" is not an exclusion of anything.** One *Klebsiella* cell in 37 carrying a
+mobile genetic element is an entirely ordinary frequency for a mobile genetic element.
+It is low, not impossible. And item 16 of this file shows an island sitting on a
+*Klebsiella* chromosome contig in a sample where *Klebsiella* is abundant, so a minority
+*Klebsiella* subpopulation is not a hypothesis we are entitled to wave away. (The
+figure is also slightly wrong: the ratio is 0.0273, so 1 in 36.6, not 1 in 33. "1 in
+33" is what you get by inverting the rounded 0.03 - item 17's class of error in
+miniature.)
+
+**What this means for `cancer_ERR1018282`.** The depth measurement fits both
+candidates: 85-100% of a 3.5x *E. coli* population carrying one copy, or 2.7% of a 109x
+*Klebsiella* population carrying one copy. **The ratio excludes neither.** The
+attribution to *E. coli* rests on parsimony - one hypothesis needs no subpopulation -
+and parsimony is not evidence. Item 8 is still right about what was wrong: abundance
+was the wrong quantity and leaning on it was wrong. What is weaker than the text claims
+is the replacement verdict.
+
+**What does not change.** Our *Klebsiella* count for CN-CRC is still 2 - this sample
+was never counted on the *Klebsiella* side, and an undetermined sample is not a
+*Klebsiella* sample. The primary analysis does not use carrier attribution at all: 167
+judgeable, MH OR 1.91, 95% CI 0.76-4.75, P = 0.1663.
+
+**Shipped with this**: `data/island_ratio_scale.tsv`, generated by
+`code/make_ratio_scale.py` and recomputed with its assertions by
+`python3 code/verify_extra.py` (section 11).
+
 ---
 
 ## 9. "None of these four pitfalls is documented anywhere"
@@ -247,10 +335,13 @@ widening the interval by 39 bp at each end moves nothing.
 example: that a pipeline without a mapping-quality filter retains the duplicated
 reads and so inflates the per-gene RPKM of *clbJ* and *clbK*.
 
-**Why it was wrong.** BWA-MEM reports one primary alignment per read. A read from the
-repeat is counted **once**, placed arbitrarily at one of the two copies. The total over
-*clbJ* + *clbK* is therefore preserved, and nothing is inflated. What is unreliable is
-only the split between the two genes.
+**Why it was wrong.** An aligner in its default mode reports one primary alignment per
+read. A read from the repeat is counted **once**, placed arbitrarily at one of the two
+copies. The total over *clbJ* + *clbK* is therefore about preserved, and nothing is
+inflated. What is unreliable is only the split between the two genes. (This paragraph
+said "BWA-MEM reports one primary alignment per read" until 2026-11-28. We have never
+run BWA-MEM - this pipeline is bowtie2 throughout - and we had not measured either
+aligner. See the amendment below, where it is measured.)
 
 **Root cause.** We reasoned from our own filter's behaviour - we drop those reads, so
 they must be being double-counted by someone who does not - without checking what an
@@ -274,6 +365,71 @@ genes after detecting homology-driven uneven coverage in them** - which is the
 reasoning behind our items 1 and 3, applied before we did it. Items 3 and 4 are, in
 substance, anticipated there. Only item 1 is absent from it. The preamble and the
 item 4 row were rewritten accordingly.
+
+---
+
+### Amended 2026-11-28: we corrected a reasoning error with more reasoning, and have now measured it
+
+The correction above is right, and the way it was arrived at was the same mistake it
+was correcting. We had claimed other people's read counts were inflated by reasoning
+from our own filter's behaviour. We then withdrew that by reasoning about how an
+aligner behaves - naming **BWA-MEM**, which this project has never run, and measuring
+nothing. Items 15 and 16 of this file are the same shape: a real statement with no
+measurement under it.
+
+So we measured it (`pipeline/mapq_split.sh`, `data/mapq_split.tsv`). One carrier,
+`cancer_ERR1018186` - the only one whose reads are still on disk, island breadth 0.9578
+- mapped to the island reference with **bowtie2**, the aligner this pipeline actually
+uses, called the same way `asm_measure.sh` calls it.
+
+**Is a read ever counted twice? No.**
+
+| | |
+|---|---|
+| primary alignments | **16,442** |
+| distinct read names | **16,442** |
+| secondary alignments | 0 |
+| supplementary alignments | 0 |
+
+Equal to the last digit, with nothing secondary. That is the whole of the "nothing is
+inflated" claim, and it holds.
+
+**What does the filter do to the two genes?** The opposite of inflating them:
+
+| gene | bp | unfiltered | MAPQ 20 | lost |
+|---|---|---|---|---|
+| *clbK* | 6,465 | 1,904 | 1,560 | **18.1%** |
+| *clbJ* | 6,501 | 2,042 | 1,665 | **18.5%** |
+| the other 16 | - | - | - | 0.2-2.1%, median 1.2% (except *clbR*, 213 bp, 11.5% on 87 reads) |
+
+So the MAPQ filter - ours - takes about 18% off each of those two genes, and leaves
+every other gene alone. **The deficit belongs to the filtered pipeline, not to the
+unfiltered one.**
+
+**And the split really is arbitrary.** The two copies of the repeat take 384 and 405
+unfiltered reads, differing by 5.5%, of which only 64 and 51 survive MAPQ 20 -
+115 of 789, or 14.6%. Two sequences 99.840% identical, each taking about half the reads
+that could belong to either: that is what arbitrary apportionment looks like, and it is
+why the per-gene split cannot be trusted while the sum can.
+
+**Where the correction overstated, by about 5%.** "The total over *clbJ* + *clbK* is
+therefore preserved" is exactly true of the counting mechanism and not quite true of
+the number. Unfiltered, those two genes carry 3,946 reads over 12,966 bp = **0.3043
+reads/bp**, against **0.3218** for the three genes over 4 kb that have no repeat in
+them (*clbN*, *clbH*, *clbB*) - so **94.6%**, a 5.4% residual deficit with no filter at
+all. At MAPQ 20 it is 77.3%. "Preserved" holds to about 5%, not exactly, and the word
+was doing more work than any measurement supported. The conclusion is unaffected: 5.4%
+is nothing beside the 19% a breadth method loses permanently, so a read-count method is
+still barely affected by the duplication.
+
+**What is still not measured.** BWA-MEM itself, which is what the withdrawn sentence
+named and what the published pipelines we were reasoning about actually use. It is not
+installed here and we did not install it to find out. One primary alignment per read is
+its documented default and the mechanism above does not depend on which aligner has it,
+but the sentence should not have named a program we never ran, and no longer does.
+
+**Shipped with this**: `data/mapq_split.tsv`, measured by `pipeline/mapq_split.sh`,
+tabulated by `code/make_mapq_table.py`, checked in `code/verify_numbers.py` section 15.
 
 ---
 
@@ -757,6 +913,35 @@ were both found by someone asking for the underlying file, and the amendment was
 by generating the file that claim depended on rather than re-reading the note that
 asserted it.
 
+**2026-11-28 brought a seventh and an eighth, from going looking rather than being
+asked.** An audit of the remaining items for this specific failure mode - a number that
+is correct and does not support the claim built on it - found two more:
+
+- **Item 8** read a depth ratio as a population fraction ("0.85, i.e. ~85% of *E. coli*
+  cells"), which is **item 3 of this same file**, five sections earlier, on a different
+  numerator. Item 3 had written down the remedy - use the ratio one-sidedly only - and
+  item 8 did not apply it to the sibling quantity. Measuring the scale then showed the
+  attribution in that item rests on parsimony rather than on exclusion.
+- **Item 10** withdrew a claim about other people's read counts by reasoning about an
+  aligner it had not run, and named BWA-MEM, which this project has never used. The
+  measurement confirms the conclusion and shows the word "preserved" was about 5%
+  too strong.
+
+So the count is eight, and **the fix for the first six did not prevent the seventh and
+eighth.** `verify_numbers.py` grew from 84 checks to 209 over those corrections and
+could not have caught either, because in both cases the data and the prose agreed
+perfectly - what disagreed was the prose and what the measurement was capable of
+showing. That is not a thing a number can check.
+
+What came out of 2026-11-28 instead is [CLAIMS.md](CLAIMS.md), which puts one column
+next to every load-bearing claim - **what alternative does this measurement exclude** -
+and grades the claim on it. Three rows came out **C**: a real measurement that excludes
+nothing. One of them is the primary result. `code/verify_claims_ledger.py` checks that
+the column is filled and that the citations resolve; it cannot check whether an answer
+in it is honest, and nothing can. The point of the file is to make the empty cells
+visible, since all eight errors were empty cells that no layout required anyone to
+look at.
+
 ---
 
 ## 17. We audited every number in the prose against the shipped data
@@ -871,6 +1056,94 @@ working tree. A stale figure now fails a check instead of waiting to be noticed.
 That does not cover numbers quoted from papers; those are checked against the reading
 notes, which are not public. Where a quoted number cannot be rechecked from anything
 we hold, it now says so in place.
+
+---
+
+## 18. The 18 genes do not total 49,455 distinct bases
+
+**What we said**, in METHODS, PITFALLS, both READMEs and four scripts: that the 18
+*clb* genes total **49,455 bp**, and that this is the denominator of breadth and of the
+density ratio R.
+
+**Why it is wrong.** 49,455 is the sum of the 18 interval lengths in
+`data/clb_genes.bed`, and four adjacent pairs overlap:
+
+| pair | overlap |
+|---|---|
+| *clbQ* / *clbP* | 8 bp |
+| *clbN* / *clbM* | 4 bp |
+| *clbL* / *clbK* | 8 bp |
+| *clbG* / *clbF* | 4 bp |
+
+So the sum double-counts **24 bp**, and the number of distinct gene bases is
+**49,431**. The project has been carrying both figures for the same object the whole
+time: 49,431 is what the six-genome competitive index used as the island target
+(`data/carrier_six_genomes.tsv`, `target_bp`), and `code/make_carrier_table.py` says
+49,431 in its own docstring on line 9.
+
+**Where it bites.** `hist_by_gene()` in `code/make_table.py` walks the per-base depth
+and assigns each position to the **first** interval that contains it, with a `break` -
+so each base is counted once, which is right. But it then fills each gene out to its
+own length with zeros:
+
+```python
+for nm, s, e in regions:
+    ln = e - s
+    miss = ln - seen[nm]
+    if miss > 0:
+        h[nm][0] += miss
+```
+
+For the later gene of an overlapping pair, `seen[nm]` is short by the overlap, because
+those bases went to the earlier gene. The 24 bases are therefore charged to the later
+gene **as uncovered**, and `call_from()` divides by `tl`, which sums to 49,455. Every
+published breadth is low, and the attainable maximum is 0.99951 rather than 1.
+
+**How much, measured rather than bounded.** Recomputing from `data/depth_hist.tsv`
+against the 49,431 denominator, the largest change in any of the 397 samples is
+**+0.000952**, or 0.095 of a percentage point:
+
+| | published | corrected |
+|---|---|---|
+| highest breadth in 397 samples | 0.960692 | 0.961158-0.961644 |
+| "everything lost" derived ceiling | 0.9480 | 0.9479 |
+
+The corrected value is a range because the shipped histogram cannot say whether those
+24 bases were covered - they are folded indistinguishably into the earlier gene's
+histogram - so it is bounded to within 24/49,431 = 0.000486. Recovering the exact
+figure needs the raw per-base depth files, which are not in this repository.
+
+**Effect on every result: none, and we checked rather than asserting it.** No sample
+crosses the breadth >= 0.5 call threshold (the nearest is nowhere near it). No gene
+crosses the 0.5 per-gene threshold: the largest overlap is 8 bp in a 6,501 bp gene, and
+the shortest gene, *clbR* at 213 bp, overlaps nothing. The derived "everything lost"
+ceiling moves from **0.9480 to 0.9479** - a difference of 0.000026, which does show up
+in the fourth place, so item 1 above now carries the right denominator in its own note
+rather than being declared unaffected. (This sentence said "0.9480 either way to four
+places" when it was first written, which the check in `code/verify_numbers.py`
+section 14 rejected on the same day: 0.947927 rounds to 0.9479.) The highest breadth becomes about
+0.9616, still far below the 0.99 that item 1 says no sample exceeded. The primary
+analysis is unchanged: 167 judgeable, MH OR 1.91, 95% CI 0.76-4.75, P = 0.1663.
+
+**We are not regenerating the data for this, and that is a choice worth stating.** The
+exact corrected breadth is not recoverable from what is shipped, the effect is 0.095 of
+a percentage point, it moves no call and no conclusion, and regenerating 397 samples to
+chase it would mean re-running a pipeline whose inputs we would have to re-download
+from ENA. What we have done instead is write down the true figure, keep the number that
+was actually used so the published values can be reproduced exactly, and add a check so
+the two figures can never silently disagree again.
+
+**The general form of this, which is the transferable part.** Summing the lengths of
+BED intervals gives the length of the features, not the number of distinct bases they
+cover, and the two differ exactly when features overlap - which adjacent genes in a
+compact operon routinely do. A pipeline that takes its numerator from a per-base walk
+(where each base is counted once) and its denominator from the interval sum has two
+different definitions of the same target, and the ratio is wrong by the overlap. This
+is now [PITFALLS.md](PITFALLS.md), in the note under the reference composition.
+
+**How it surfaced.** While adding a check for the new island-ratio table, the island's
+`target_bp` in `data/carrier_six_genomes.tsv` read 49,431 where the constant in
+`code/verify_extra.py` read 49,455. Two numbers for one object, 24 apart.
 
 ---
 

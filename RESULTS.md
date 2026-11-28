@@ -164,7 +164,7 @@ breadth is given because a species with breadth below ~0.1 is not really present
 | cancer_ERR1018229 | CRC | 4.0 | 4.2 (0.91) | **0.95** | 1.44 (0.67) | 2.75 | *E. coli* |
 | cancer_ERR1018213 | CRC | 54.5 | 63.9 (0.95) | **0.85** | 0.14 (0.13) | 387 | *E. coli* |
 | cancer_ERR1018198 | CRC | 4.7 | 5.2 (0.86) | **0.91** | 16.7 (0.94) | 0.28 | *E. coli* - **despite abundant Kp** |
-| cancer_ERR1018282 | CRC | 3.0 | 3.5 (0.84) | **0.85** | 109.4 (0.89) | 0.03 | *E. coli* - **despite 109x Kp** |
+| cancer_ERR1018282 | CRC | 3.0 | 3.5 (0.84) | **0.85** | 109.4 (0.89) | 0.0273 | *E. coli* on parsimony - Kp not excluded |
 | cancer_ERR1018224 | CRC | 5.7 | 20.3 (0.89) | 0.28 | 0.005 (0.004) | - | *E. coli* by exclusion (nothing else present) |
 | n_ERR1018245 | control | 3.9 | 27.6 (0.95) | 0.14 | 1.09 (0.59) | 3.57 | *E. coli* by exclusion (Kp too shallow) |
 | **cancer_ERR1018186** | **CRC** | 13.5 | 0.41 (0.31) | **33** | 10.3 (0.88) | 1.30 | ***K. pneumoniae*, assembly-confirmed** ST23/K1 (automatic bin); ICEKp10 and a complete *clb* 2 only with the island contigs added, which are placed in this genome by the island tiling and by the element's two flanks rather than by the typing - see [CORRECTIONS](CORRECTIONS.md) item 16 |
@@ -213,16 +213,36 @@ rather than counting them toward either species. `n_ERR1018236` also has **no
 *K. pneumoniae* marker measurement at all** (NA, see [CORRECTIONS.md](CORRECTIONS.md)
 item 7), so there is no independent cross-check for it.
 
-**`cancer_ERR1018198` and `cancer_ERR1018282` are the counterexamples that keep this
-honest.** In `cancer_ERR1018198`, *K. pneumoniae* is present at 16.7x with 0.94 genome
-breadth - abundant and unambiguous - and is still not the carrier; *E. coli* is, at
-ratio 0.91. `cancer_ERR1018282` is more extreme: Kp at **109x** against *E. coli* at
-3.5x, and the island still tracks *E. coli* (ratio 0.85) rather than Kp (ratio 0.03,
-i.e. 1 Kp cell in 33). **Abundance of a species is not carriage by that species**, and
-any method that attributes the island to whichever *Klebsiella* happens to be abundant
-will get both of these samples wrong. We made exactly that mistake with
-`cancer_ERR1018282` before its genome measurement existed; see
+**`cancer_ERR1018198` and `cancer_ERR1018282` are the samples where abundance pulls
+hardest in the wrong direction.** In `cancer_ERR1018198`, *K. pneumoniae* is present at
+16.7x with 0.94 genome breadth - abundant and unambiguous - while the island sits at
+4.7x and *E. coli* at 5.2x, ratio **0.911**. In `cancer_ERR1018282` the pull is extreme:
+Kp at **109x** against *E. coli* at 3.5x, and the island at 3.0x, ratio **0.850** on
+*E. coli*. **Abundance of a species is not carriage by that species**, and a method that
+attributes the island to whichever *Klebsiella* happens to be abundant will read both of
+these samples wrong. We made exactly that mistake with `cancer_ERR1018282`; see
 [CORRECTIONS.md](CORRECTIONS.md) item 8.
+
+**But the depth ratio does not exclude *Klebsiella* in either sample, and this paragraph
+used to say it did.** The ratio on Kp is 0.0273 in `cancer_ERR1018282` - 1 *Klebsiella*
+cell in 37 - and 0.283 in `cancer_ERR1018198` - 1 cell in 3.5. Those are ordinary
+frequencies for a mobile genetic element, not impossibilities, and our own item 16 shows
+an island on a *Klebsiella* chromosome in a sample where *Klebsiella* is abundant.
+`cancer_ERR1018198` is worse still: *C. freundii* is at 3.4x, ratio **1.37**, so three
+species fit its depths. (The text here read "1 Kp cell in 33", which comes from
+inverting the rounded 0.03 rather than the measured 0.0273.)
+
+**What survives, and what does not.** What survives is the negative half: ranking
+candidates by abundance is the wrong operation, and these two samples demonstrate it.
+What does not survive is the positive half - the attribution of these two samples to
+*E. coli* rests on parsimony, because *E. coli* is the only candidate that needs no
+minority subpopulation. Parsimony is not evidence. The scale of this ratio has now been
+measured (`data/island_ratio_scale.tsv`, [CORRECTIONS.md](CORRECTIONS.md) item 8
+amendment): across the four samples where five of the six species are excluded at
+>= 100x it runs 0.278-1.026, so a value near 1 is where a fully-carrying population
+sits - but the band spans 3.7x on n = 4, and **there is no calibrator for *Klebsiella* at
+all**. Settling these two needs what settled `cancer_ERR1018186`: an assembly that puts
+the island on a chromosome. See [CLAIMS.md](CLAIMS.md) row 8.
 
 ### Summary of carriers
 
@@ -237,7 +257,7 @@ the 9.
 | Attribution | n | Samples |
 |---|---|---|
 | *E. coli*, ratio 0.85-1.03 with no competing species | 4 | `cancer_ERR1018213`, `cancer_ERR1018229`, `cancer_ERR1018307`, `n_ERR1018246` |
-| *E. coli*, despite an abundant *Klebsiella* | 2 | `cancer_ERR1018198`, `cancer_ERR1018282` |
+| *E. coli* on parsimony, with an abundant *Klebsiella* **not excluded** | 2 | `cancer_ERR1018198`, `cancer_ERR1018282` - the depth ratio fits a *Klebsiella* minority (1 cell in 3.5 and 1 in 37) as well as it fits *E. coli*, and in `cancer_ERR1018198` *C. freundii* fits too (ratio 1.37). Graded **C** in [CLAIMS.md](CLAIMS.md) |
 | *E. coli* by exclusion, minority of cells | 2 | `cancer_ERR1018224`, `n_ERR1018245` |
 | ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) - contig `k119_45171`, 386,079 bp: *Klebsiella* chromosome to ~354,276 then the island to the end, with read depth never falling below 12 across the junction. The other three island contigs tile the same island with 119 bp overlaps - exactly the assembly's k - so they are one island with this contig, and the whole 137.7 kb insertion is flanked on both sides by contigs the automatic assignment placed in *Klebsiella*. See `data/assembly_alignment.tsv`, `data/kleborate/island_tiling.tsv`, `data/kleborate/island_locus.tsv` and `python3 code/verify_extra.py` |
 | ***K. pneumoniae***, *E. coli* excluded by coverage | 2 | `n_ERR1018237` (CN control), `n_CCMD39882286ST` (DE control) |

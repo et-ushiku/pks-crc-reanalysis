@@ -66,6 +66,8 @@ are visible rather than buried in the file.
 | `make_backbone_table.py` | `data/kleborate/island_contig_backbone.tsv`, `data/kleborate/contig_depth.tsv` - each island contig's non-island portion and its coverage depth |
 | `make_marker_table.py` | `data/marker_counts.tsv` - raw marker read counts per sample per SGB, which the abundance columns are computed from and which were not shipped before |
 | `make_locus_table.py` | `data/kleborate/island_tiling.tsv`, `data/kleborate/island_locus.tsv` - how the island contigs overlap each other on the island reference, and where the element they belong to sits in the *Klebsiella* chromosome |
+| `make_mapq_table.py` | `data/mapq_split.tsv` - reads per gene with and without the MAPQ 20 filter, from `pipeline/mapq_split.sh`; the measurement that replaced item 10's reasoning |
+| `make_ratio_scale.py` | `data/island_ratio_scale.tsv` - the island/species depth ratio for all 14 carriers and the samples that calibrate its scale, selected without looking at the ratio |
 | `make_link_table.py` | `data/kleborate/contig_read_depth.tsv`, `data/kleborate/contig_links.tsv` - per-contig read depth (not megahit `multi`) and read pairs spanning two contigs, from `pipeline/asm_linkage.sh` |
 
 `make_clb_in_genomes.py` is the exception to "will not run here": it needs only an

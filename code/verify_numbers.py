@@ -416,6 +416,141 @@ chk("k119_70945 の割合は 10 kb 以上の範囲の中", True,
     shband(10000, 10 ** 9)[0] <= float(lk["k119_70945"]["share_kp_bin_or_island"])
     <= shband(10000, 10 ** 9)[1])
 
+print("\n13. 深さの比の目盛り  CORRECTIONS.md 8 番の追補")
+rs = {r["sample"]: r for r in load("island_ratio_scale.tsv")}
+cal = [r for r in rs.values() if r["calibrator_for"] == "Ecoli_IHE3034"]
+chk("E. coli の較正検体は 4 件", 4, len(cal))
+chk("K. pneumoniae の較正検体は 0 件", 0,
+    len([r for r in rs.values()
+         if r["calibrator_for"] == "Kpneumoniae_HS11286"]))
+for smp, isl, ec, rat in (("cancer_ERR1018224", 5.646, 20.278, 0.278),
+                          ("cancer_ERR1018213", 54.509, 63.859, 0.854),
+                          ("cancer_ERR1018307", 391.191, 407.178, 0.961),
+                          ("n_ERR1018246", 14.129, 13.775, 1.026)):
+    chk("%s の島の深さ %.3f" % (smp, isl), isl,
+        float(rs[smp]["island_depth"]), 0.0006)
+    chk("%s の E. coli の深さ %.3f" % (smp, ec), ec,
+        float(rs[smp]["Ecoli_IHE3034"]), 0.0006)
+    chk("%s の 島/E.coli %.3f" % (smp, rat), rat,
+        float(rs[smp]["island_over_ecoli"]), 0.0006)
+cv = sorted(float(r["island_over_ecoli"]) for r in cal)
+chk("較正の帯は 0.278-1.026", (0.278, 1.026), (round(cv[0], 3), round(cv[-1], 3)))
+chk("その幅は 3.7 倍", 3.7, cv[-1] / cv[0], 0.05)
+coff = [float(r["island_depth_covered_only"]) / float(r["island_depth"])
+        for r in cal]
+chk("重複ぶんのずれは 1.041-1.046 倍", (1.041, 1.046),
+    (round(min(coff), 3), round(max(coff), 3)))
+chk("1 コピーがすべての細胞にある場合の上端は約 1.07", 1.07,
+    cv[-1] * sum(coff) / len(coff), 0.005)
+e = rs["cancer_ERR1018282"]
+chk("282 の島/E.coli 0.850", 0.850, float(e["island_over_ecoli"]), 0.0006)
+chk("282 の島/Kp 0.0273", 0.0273, float(e["island_over_kp"]), 6e-5)
+chk("282 の Kp は 36.6 細胞に 1（公表した 33 ではない）", 36.6,
+    1 / float(e["island_over_kp"]), 0.05)
+chk("282 の Kp のゲノム深さ 109.4", 109.4,
+    float(e["Kpneumoniae_HS11286"]), 0.05)
+chk("282 の E. coli のゲノム深さ 3.516", 3.516,
+    float(e["Ecoli_IHE3034"]), 0.0006)
+chk("六ゲノム索引の島の長さ 49,431 bp", 49431,
+    int([r for r in load("carrier_six_genomes.tsv")
+         if r["target"] == "pks_island_clb_genes"][0]["target_bp"]))
+
+print("\n14. 遺伝子の重なり  CORRECTIONS.md 18 番")
+# bed の区間の長さの和は、覆っている塩基の数ではない。重なるぶんだけ多い
+iv = sorted((int(a), int(b), g) for g, a, b in
+            ((q[3], q[1], q[2]) for q in
+             (l.split() for l in io.open(
+                 os.path.join(DATA, "clb_genes.bed"), encoding="utf-8"))))
+chk("bed の区間の長さの和 49,455 bp", 49455, sum(b - a for a, b, _ in iv))
+mer = []
+for a, b, _ in iv:
+    if mer and a <= mer[-1][1]:
+        mer[-1][1] = max(mer[-1][1], b)
+    else:
+        mer.append([a, b])
+chk("重なりを畳んだ長さ 49,431 bp", 49431, sum(b - a for a, b in mer))
+chk("差は 24 bp", 24, sum(b - a for a, b, _ in iv) - sum(b - a for a, b in mer))
+ovl = []
+prev = None
+for a, b, g in iv:
+    if prev and a < prev[1]:
+        ovl.append((prev[2], g, prev[1] - a))
+    prev = (a, b, g)
+chk("重なるのは隣り合う 4 組", 4, len(ovl))
+chk("その重なりは 8/4/8/4 bp", [8, 4, 8, 4], [o[2] for o in ovl])
+chk("重なる組は clbQ/clbP, clbN/clbM, clbL/clbK, clbG/clbF",
+    [("clbQ", "clbP"), ("clbN", "clbM"), ("clbL", "clbK"), ("clbG", "clbF")],
+    [(o[0], o[1]) for o in ovl])
+chk("最短の遺伝子 clbR 213 bp は重なっていない", True,
+    all("clbR" not in (o[0], o[1]) for o in ovl))
+# 覆いを 49,431 で割り直したときの動きを実測する。山からは 24 塩基が
+# 覆われていたか分からないので、上下の幅つきで出る
+cov, tot = {}, {}
+for r in load("depth_hist.tsv"):
+    n = int(r["bases"])
+    tot[r["sample"]] = tot.get(r["sample"], 0) + n
+    if int(r["depth"]) >= 1:
+        cov[r["sample"]] = cov.get(r["sample"], 0) + n
+chk("山の塩基の総数はどの検体も 49,455", {49455}, set(tot.values()))
+shift = max((min(c + 24, 49431) / 49431.0) - (c / 49455.0)
+            for c in cov.values())
+chk("直したときの覆いの動きは最大 0.000952", 0.000952, shift, 5e-6)
+chk("幅は 24/49,431 = 0.000486", 0.000486, 24 / 49431.0, 5e-7)
+chk("閾値 0.5 を跨ぐ検体は 0 件", 0,
+    sum(1 for c in cov.values()
+        if (c / 49455.0 < 0.5) != (min(c + 24, 49431) / 49431.0 < 0.5)))
+chk("公表した下限 0.9480 は 49,455 で割った値", 0.9480,
+    (49455 - DUP_BP) / 49455.0, 5e-5)
+chk("49,431 で割り直すと 0.9479", 0.9479, (49431 - DUP_BP) / 49431.0, 5e-5)
+chk("その差は 0.000026", 2.6e-5,
+    (49455 - DUP_BP) / 49455.0 - (49431 - DUP_BP) / 49431.0, 2e-6)
+
+print("\n15. MAPQ で絞る前と後  CORRECTIONS.md 10 番の追補")
+mq = {r["name"]: r for r in load("mapq_split.tsv")}
+chk("primary の本数 16,442", 16442,
+    int(mq["primary_alignments"]["reads_unfiltered"]))
+chk("読み取り名の種類数も 16,442", 16442,
+    int(mq["distinct_read_names"]["reads_unfiltered"]))
+chk("この 2 つが等しい（= 二重計上は無い）", True,
+    mq["primary_alignments"]["reads_unfiltered"]
+    == mq["distinct_read_names"]["reads_unfiltered"])
+chk("secondary は 0", 0, int(mq["secondary"]["reads_unfiltered"]))
+chk("supplementary は 0", 0, int(mq["supplementary"]["reads_unfiltered"]))
+for g, a, b, loss in (("clbK", 1904, 1560, 0.181), ("clbJ", 2042, 1665, 0.185)):
+    chk("%s 絞らない %d 本" % (g, a), a, int(mq[g]["reads_unfiltered"]))
+    chk("%s MAPQ20 %d 本" % (g, b), b, int(mq[g]["reads_mapq20"]))
+    chk("%s が失う割合 %.1f%%" % (g, 100 * loss), loss,
+        float(mq[g]["mapq20_loss"]), 0.0006)
+oth = [r for r in mq.values() if r["kind"] == "gene"
+       and r["name"] not in ("clbJ", "clbK", "clbR")]
+ol = sorted(float(r["mapq20_loss"]) for r in oth)
+chk("clbR を除く他の 15 遺伝子は 0.2-2.1% しか失わない", (0.002, 0.021),
+    (round(ol[0], 3), round(ol[-1], 3)))
+chk("その中央値は 1.2%", 0.012, ol[len(ol) // 2], 0.0015)
+chk("clbR（213 bp, 87 本）は 11.5% 失う", 0.115,
+    float(mq["clbR"]["mapq20_loss"]), 0.0006)
+rc = [r for r in mq.values() if r["kind"] == "repeat_copy"]
+chk("重複の複製は 2 つ", 2, len(rc))
+cu = sorted(int(r["reads_unfiltered"]) for r in rc)
+chk("2 つの複製は 384 と 405 本", (384, 405), tuple(cu))
+chk("2 つの差は 5.5%（ほぼ半分ずつ）", 1.055, cu[1] / float(cu[0]), 0.0006)
+cm = sum(int(r["reads_mapq20"]) for r in rc)
+chk("MAPQ20 で残るのは 115 本", 115, cm)
+chk("それは 789 本の 14.6%", 0.146, cm / float(sum(cu)), 0.0006)
+# 「合計は保たれる」が約 5% しか保たれないこと
+big = [mq[g] for g in ("clbN", "clbH", "clbB")]
+rate = (sum(int(r["reads_unfiltered"]) for r in big)
+        / float(sum(int(r["bp"]) for r in big)))
+chk("重複の無い 4kb 以上 3 遺伝子の密度 0.3218 本/bp", 0.3218, rate, 6e-5)
+dj = sum(int(mq[g]["reads_unfiltered"]) for g in ("clbJ", "clbK"))
+db = sum(int(mq[g]["bp"]) for g in ("clbJ", "clbK"))
+chk("clbJ+clbK 絞らない 3,946 本 / 12,966 bp", (3946, 12966), (dj, db))
+chk("その密度 0.3043 本/bp", 0.3043, dj / float(db), 6e-5)
+chk("期待の 94.6%（= 残り 5.4% の欠損）", 0.946,
+    (dj / float(db)) / rate, 0.0006)
+dm = sum(int(mq[g]["reads_mapq20"]) for g in ("clbJ", "clbK"))
+chk("MAPQ20 では期待の 77.3%", 0.773, (dm / float(db)) / rate, 0.0006)
+
 print("\n%d 件を検算し、%d 件が不一致" % (NOK[0], len(BAD)))
 if BAD:
     for where, claim, got in BAD:

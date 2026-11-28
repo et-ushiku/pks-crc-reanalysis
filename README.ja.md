@@ -136,6 +136,7 @@ python3 code/verify_rarefy.py    # 計算で間引いた値と、実際に fastq
 python3 code/verify_extra.py     # 以前は検算できなかったものを計算し直す
                                  # （深さの差・比のずれ・回帰・担い手・接合部・
                                  #   型別・島の contig の帰属）
+python3 code/verify_claims_ledger.py  # CLAIMS.md の構造を確かめる
 python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要ネットワーク）
 ```
 
@@ -157,17 +158,21 @@ python3 code/verify_repeat.py    # AM229678.1 から重複を測り直す（要�
 | [METHODS.md](METHODS.md) | 手順、参照配列、事前に決めた閾値、間引きの式の導出 |
 | [PITFALLS.md](PITFALLS.md) | 上の 4 つの測定値、それぞれ何が既に報告されていたか、実際の論文での実例 |
 | [CORRECTIONS.md](CORRECTIONS.md) | **自分が書いて後から撤回した主張の全部とその理由** |
+| [CLAIMS.md](CLAIMS.md) | **主張ごとに、何が支えていて、その測定が何を排除するか。** A〜D の等級つき。真ん中の欄が「どの代案を排除するか」なのは、訂正のうち 4 件が「数字は正しいが何も排除していない」型だったから |
 | `data/depth_hist.tsv` | 検体ごと・遺伝子ごとの深さの度数分布 — **再現用の本体** |
 | `data/per_sample.tsv` | 397 行。総読み取り数・**島の参照配列に貼り付いた本数**・覆い・遺伝子数・判定・大腸菌%・Klebsiella%（**測っていない検体は NA**。CORRECTIONS.md の 7 番） |
 | `data/missing_split.tsv` | 覆われなかった塩基を、重複の内と外に分けたもの |
 | `data/clb_genes.bed` | AM229678.1 上の 18 遺伝子の区間 |
 | `code/analyse.py` | `data/` だけから主結果を再現する |
-| `code/verify_numbers.py` | 文書に書いた数字 147 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
+| `code/verify_numbers.py` | 文書に書いた数字 209 件を `data/` から計算し直し、1 件でも合わなければ異常終了する |
+| `code/verify_claims_ledger.py` | CLAIMS.md の機械で見られるところを確かめる。どの行も「何を排除するか」が埋まっているか、等級が A〜D か、引いたファイルと訂正項目が実在するか。**正直かどうかは確かめられない** |
 | `code/verify_marker_scaling.py` | 量の列が置いている唯一の仮定（目印の長さに比例する）を、長さを使わない別の索引で測って検証する |
 | `data/kleborate/island_tiling.tsv` | 島が載った contig を島の参照の上に並べ、継ぎ目の重なりを出したもの |
 | `data/kleborate/island_locus.tsv` | 島を含む挿入要素ぜんたいの並びと、各 contig の Klebsiella 染色体側の当たり |
 | `data/kleborate/contig_read_depth.tsv` | 読み取りをアセンブル全体に貼り直して測った contig ごとの深さ。megahit の `multi` と並べてある |
 | `data/kleborate/contig_links.tsv` | 対の両端が別の contig に落ちた組の数。相手は割り振りのある contig だけ |
+| `data/island_ratio_scale.tsv` | 担体 14 件の 島/種 の深さの比。どの種が排除されるか、どの検体が比の目盛りを較正するか |
+| `data/mapq_split.tsv` | clb 遺伝子ごとの、MAPQ 20 で絞る前と後の本数。貼り付け総数と読み取り名の種類数（= 二重計上が無いこと）と、重複の 2 複製への積まれ方 |
 | `code/verify_rarefy.py` | 計算の間引きと実測の間引きを突き合わせる。差は最大 0.0211、判定は 5/5 一致 |
 | `code/verify_extra.py` | DE-CRC の群間の深さの差、密度比のずれ、深さで調整した回帰、担い手の表、アセンブリの接合部、株の型別、島の contig が本当にそのゲノムのものかを計算し直す |
 | `code/verify_repeat.py` | AM229678.1 を ENA から取って重複を測り直す。**唯一ネットワークが要る**スクリプト |

@@ -162,8 +162,12 @@ def main():
     print("  欠けが**重複領域の中だけ**の検体: %d / %d" % (len(clean), len(high)))
     print("  0.99 を超えた検体（重複まで覆われたことになり異常）: %s"
           % (", ".join("%s %.4f" % (r[0], r[2]) for r in bad_high) if bad_high else "なし"))
-    print("  遺伝子 14/18 を満たすのに覆いが下限 0.9495 未満: %d 件"
-          % len(bad_low))
+    # 下限は後に 0.9480 と測り直した（CORRECTIONS.md 9 番）。当時の 0.9495 も
+    # 残して両方出す。どちらで数えても件数は同じだが、それは結果であって
+    # 前提ではないので、黙って片方だけ出すことはしない
+    bad_low_new = [r for r in high if r[2] < 0.9480 and r[3] >= CALL_GENES]
+    print("  遺伝子 14/18 を満たすのに覆いが下限未満: 0.9495 で %d 件、"
+          "測り直した 0.9480 で %d 件" % (len(bad_low), len(bad_low_new)))
     if bad_low:
         for r in bad_low:
             print("      %-26s %.4f  遺伝子 %d  重複外の欠け %d bp"

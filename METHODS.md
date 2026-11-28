@@ -24,7 +24,11 @@ are reported as reference only, never as the primary analysis.
 ## Reference and mapping
 
 - Island reference: *E. coli* IHE3034 *pks* island, GenBank **AM229678.1**, 55,140 bp.
-- Gene intervals: `data/clb_genes.bed`, 18 genes totalling **49,455 bp**. The
+- Gene intervals: `data/clb_genes.bed`, 18 genes totalling **49,455 bp** - which is
+  the sum of the interval lengths, and four adjacent pairs overlap, so the genes cover
+  **49,431 distinct bases**. Breadth here is divided by 49,455 while its numerator
+  counts each base once; the discrepancy is at most 0.000952 of breadth and changes no
+  call (CORRECTIONS.md item 18, checked in `code/verify_numbers.py` section 14). The
   remaining 5,685 bp is intergenic/backbone and is excluded from breadth.
 - Aligner: `bowtie2 --very-sensitive --no-unal`, single-end (both mates supplied
   independently as `-U`, so counts are reads, not fragments).
@@ -66,6 +70,19 @@ are reported as reference only, never as the primary analysis.
   (`pipeline/asm_genomes.sh`). Species: *E. coli* IHE3034, *K. pneumoniae* HS11286,
   *C. freundii* CFNIH1, *C. koseri* BAA-895, *E. cloacae* ATCC13047,
   *K. aerogenes* KCTC2190.
+- **The scale of the island/species depth ratio was measured, not assumed**
+  (`code/make_ratio_scale.py`, `data/island_ratio_scale.tsv`). A species is excluded as
+  the carrier at island depth >= 100x its genome depth, and a **calibrator** is a
+  sample where five of the six are excluded, so the sixth is the carrier beyond doubt;
+  no condition is placed on the ratio itself, since conditioning on it would select
+  values near 1 and make the calibration circular. Four samples calibrate *E. coli*,
+  giving 0.278, 0.854, 0.961 and 1.026 - so the quantity has no large multiplicative
+  offset of the kind R has (1.9x), and a fully-carrying single-copy population sits
+  near 1.0 (near 1.07 once the ~2,000 repeat bases that MAPQ 20 can never cover are
+  taken out of the island's denominator, worth 1.041-1.046x). **The band spans 3.7x on
+  n = 4, so no value may be read as a cell fraction**, and **there is no calibrator for
+  *K. pneumoniae* at all** - the scale is measured for *E. coli* only. See
+  CORRECTIONS.md item 8's 2026-11-28 amendment.
 
 ## Rarefying without the reads
 
