@@ -233,7 +233,35 @@ minimum depth of 12 and **no base at zero** (`data/assembly_junction_depth.tsv`)
 not agree, and the difference matters**: species, ST and K type come from the
 automatic bin, while ICEKp10 and a complete *clb* 2 appear only in the second run.
 A typing from a hand-assembled bin is not independent evidence of what the added
-contigs belong to - that evidence is step 4. See CORRECTIONS.md item 16.
+contigs belong to - that evidence is step 4, and two further measurements added on
+2026-11-28 (`code/make_locus_table.py`, checked by `verify_extra.py` sections 8 and 9):
+
+- **Island tiling.** The four island contigs are laid out on the island reference
+  AM229678.1. Junctions between different contigs are reported as overlaps; an overlap
+  of exactly k (=119, this assembly's final k-mer length) means the two contigs are
+  consecutive nodes of one path in the assembly graph. All four such junctions are
+  exactly 119 bp, and both breaks fall on the two copies of the duplication of
+  PITFALLS item 1. Thresholds: alignments at >= 99.0% identity over >= 1,000 bp.
+- **The element's flanks.** The element containing the island is tiled on the only
+  reference that carries the whole of it (*C. koseri* BAA-895, used as a coordinate
+  ruler and not as a statement of origin). Its extent is grown from the island-bearing
+  contigs by overlap, allowing gaps of up to 200 bp, rather than from a window chosen
+  by hand. The contigs reaching its two ends are then checked for membership of the
+  automatic bin, and their *K. pneumoniae* chromosome intervals for adjacency.
+
+- **Read depth and read-pair linkage.** The reads are mapped back to the whole
+  assembly - all 21,759 contigs in one bowtie2 index, so a read goes to its best place
+  anywhere in the assembly rather than being forced onto the bin - and filtered at
+  MAPQ 20 (`pipeline/asm_linkage.sh`). Per-contig read depth replaces megahit's
+  `multi`, which is a k=119 graph multiplicity against 100 bp reads and is not a read
+  depth. Pairs whose mates land on different contigs are counted, which requires not
+  filtering on proper-pair: a pair spanning two contigs is by definition not
+  concordant. Partners are restricted, before counting, to the 160 contigs the
+  six-genome step assigned at breadth >= 0.5. Each added contig is then compared with
+  the bin's own contigs **in the same length band**, because below 10 kb the bin's own
+  contigs span the whole range and the test has no power.
+
+See CORRECTIONS.md item 16.
 
 **Step 6, do the added contigs belong to that genome.** Alignments are split at the
 island boundary, where the boundary is set by exact 40-mer matches grouped into

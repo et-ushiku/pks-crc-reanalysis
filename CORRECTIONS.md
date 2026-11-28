@@ -565,6 +565,10 @@ Two things fall out of it that were not visible before:
 
 - **`k119_25170` should probably never have been in the island set.** Depth 8.87,
   about half the genome's, and only 137 bp of exact island *k*-mers.
+  (The depth half of this is wrong - see the 2026-11-28 amendment below. In read depth
+  that contig is at 0.874 of the bin, not half; 8.87 is a megahit `multi` value and
+  `multi` misreports this one contig by a factor of 1.9. The 137 bp stands and is the
+  reason.)
 - **`k119_25144` is not an island contig either**, though it was in the island FASTA
   and in the automatic bin: 1,024 bp of island in four scattered blocks across 214 kb.
 
@@ -574,6 +578,164 @@ an ad hoc coordinate cut and no record of how it was computed. The first version
 the table above had its own version of the same bug - taking the island's extent as
 first-hit-to-last-hit, which turns `k119_25144`'s four scattered blocks into "39,448
 bp of island" - and that is recorded in `code/make_backbone_table.py`.
+
+### Amended 2026-11-28: the depth argument was replaceable, and we replaced it
+
+The section above ended by calling its own evidence "coverage depth plus the absence
+of the alternative", "weaker than the single contig of item 15". Asked to deal with
+that, we found two things wrong with the argument and one thing we had never looked
+at.
+
+**The depths in that table are not read depths.** Every number in it is megahit's
+`multi`. This assembly was built to k=119 and the reads are 100 bp, so `multi` is a
+multiplicity in a de Bruijn graph built from the reads **plus the contigs carried
+forward from the smaller k**. It is not a read depth, and we never calibrated it
+against one. Four of the six contigs are also mostly backbone - the island is 8%,
+0.5%, 22% and 3% of them - so their `multi` is their backbone's, not the island's.
+One thing in that column does survive: a contig at twice its neighbours is what a
+collapsed two-copy repeat looks like, and that is used again below.
+
+**We had treated the four added contigs as four separate objects.** That is *why*
+only depth was left: taken one at a time, each one needs its own provenance, and
+there was nothing else to hand. They are not separate. Laid out on the island
+reference AM229678.1 (54,791 bp) they tile it, at 99.76-100% identity:
+
+| order | contig | in the bin | island | identity | overlap with previous |
+|---|---|---|---|---|---|
+| 1 | `k119_70945` | no | 1,842-16,184 | 99.958% | - |
+| 2 | `k119_32464` | no | 16,066-17,313 | 99.760% | **119 bp** |
+| 3 | `k119_70596` | no | 17,195-21,837 | 100.000% | **119 bp** |
+| 4 | `k119_32464` | no | 21,719-22,966 | 99.760% | **119 bp** |
+| 5 | `k119_45171` | **yes** | 22,848-51,731 | 99.976% | **119 bp** |
+| 6 | `k119_45171` | **yes** | 51,804-54,791 | 99.833% | -72 bp, inside one contig |
+
+**Every junction between two different contigs is an overlap of exactly 119 bp** -
+the k-mer length this assembly was built at, the `k119_` in every contig name. That
+is not a coordinate artefact: taking the contig sequences themselves, the end of each
+contig and the start of the next share **119 bases of identical sequence**, in the
+right orientation, at all four junctions. Both numbers are in
+`data/kleborate/island_tiling.tsv` and both are asserted. Contigs sharing exactly k
+bases are consecutive nodes of one path in the assembly graph. megahit did not
+produce four fragments of uncertain origin. It produced one island, 52,878 of the
+reference's 54,791 bp, and broke it twice. One of the four, `k119_45171`, is the
+contig of item 15: 350 kb of *Klebsiella* chromosome running into the island with
+read depth never dropping across the join. **The other three reach the chromosome through it, by
+overlap.** That is the step we had missed, and it needs no depth at all.
+
+**Where it broke is the duplication of PITFALLS item 1.** `k119_32464` is in the
+tiling twice, at island 16,066 and island 21,719. PITFALLS item 1 measured that
+duplication from the reference alone - 1,287 bp starting at **16,066**, the two copies
+**5,653 bp** apart - and `code/verify_repeat.py` checks it against ENA. Same start,
+same spacing, and it is the one contig at twice its neighbours' multiplicity. The
+k-mer scan reads the reference; this reads an assembly of one sample's reads. They
+share no input and they land on the same repeat.
+
+**The element has two flanks, and both were in the automatic bin already.** The island
+is part of a larger insertion. Measured on the only one of the six references that
+carries the whole element - *C. koseri* BAA-895, used **as a ruler, not as a claim
+about origin** - the element runs 816,165-953,855, 137,690 bp, tiled by 13 contigs.
+Its two ends are reached by `k119_45171` and `k119_25144`, and **neither was added by
+hand**. On the *Klebsiella* chromosome, `k119_25144` runs 3,250,687-3,506,454 and
+`k119_45171` picks up at 3,506,446: the two intervals meet within 8 bp. One insertion,
+one site, both flanks in the automatic bin, the added contigs filling the interior.
+That is position - not depth, not similarity.
+
+`k119_25144`'s own end shows the crossing: its last 4 kb runs through 1,358 bp that
+aligns to *both* references (an attachment-site repeat - *Klebsiella* 3,433,470-3,434,828
+and the ruler at 952,497-953,855), then 1,885 bp of *Klebsiella* chromosome ending at
+3,506,454, then 1,037 bp of the element to the end of the contig.
+
+**What this argument assumes**, and section 8's does not: that the two contigs'
+positions can be read off HS11286, i.e. that the local chromosome order is the same in
+HS11286 (ST11) and in this strain (ST23). A rearrangement between them would break the
+"both flanks" reading. The tiling in section 8 uses no reference order at all, only
+the contigs' own overlaps, so the two arguments fail in different ways.
+
+It also explains why the similarity argument failed on `k119_70945` specifically. That
+contig's backbone aligns to the *Klebsiella* chromosome too, at 3,434,608-3,479,783,
+inside a stretch of HS11286 that `k119_25144` skips: HS11286 carries a related element
+at a different site. A sequence present in both genera is exactly the sequence whose
+species cannot be read off similarity, which is what the section above says, now with
+the reason visible.
+
+Seven of the 13 tiling contigs were never added to the bin. The element is larger than
+the island and the bin is not the whole genome; nothing in the typing depends on those
+seven.
+
+**We also measured the depths properly, and one of them was wrong.** The reads were
+mapped back to the whole assembly - all 21,759 contigs in one competitive index, MAPQ
+20 (`pipeline/asm_linkage.sh`). On that scale `multi` turns out to track read depth
+closely for five of the six contigs (multi/depth 0.736-0.786) and **not at all for
+`k119_25170` (0.404)**:
+
+| contig | bp | `multi` | read depth | x the bin | multi/depth |
+|---|---|---|---|---|---|
+| the bin, 62 contigs | 5,082,743 | 18.08 | **25.13** | 1.000 | - |
+| `k119_45171` | 386,079 | 18.01 | 24.25 | 0.965 | 0.743 |
+| `k119_25144` | 214,126 | 16.40 | 22.29 | 0.887 | 0.736 |
+| `k119_70945` | 63,927 | 18.99 | 25.08 | 0.998 | 0.757 |
+| `k119_70596` | 4,643 | 19.83 | 26.58 | 1.058 | 0.746 |
+| `k119_25170` | 4,341 | **8.87** | **21.97** | **0.874** | **0.404** |
+| `k119_32464` | 1,248 | 36.00 | 45.83 | 1.824 | 0.786 |
+
+The bin's own 46 contigs over 10 kb span 0.76-1.33 times the bin's depth, so all four
+added contigs are inside the bin's own spread, and the collapsed repeat is at 1.82 -
+near the 2 it has to be. **This corrects one of the two things the section above said
+it had found:** "`k119_25170` should probably never have been in the island set. Depth
+8.87, about half the genome's" - the depth half of that does not hold. In read depth it
+is at 0.874 of the bin, like everything else. The reason to doubt that contig is the
+other half, its 137 bp of island, which stands.
+
+**Read-pair linkage.** The same mapping gives pairs whose two mates land on different
+contigs, both at MAPQ 20. Partners are counted only among the 160 contigs the
+six-genome step assigned at breadth >= 0.5; the other 21,599 are other gut bacteria and
+pairs reaching them are shared repeats. The rule was fixed before counting.
+
+| contig | bp | to the bin | to added island | to other species | share bin+island | to bin per kb |
+|---|---|---|---|---|---|---|
+| `k119_45171` (bin) | 386,079 | 377 | 37 | 27 | 0.939 | 0.98 |
+| `k119_25144` (bin) | 214,126 | 216 | 9 | 15 | 0.938 | 1.01 |
+| `k119_70945` | 63,927 | **69** | 39 | 7 | **0.939** | 1.08 |
+| `k119_70596` | 4,643 | 0 | 83 | 0 | 1.000 | 0.00 |
+| `k119_25170` | 4,341 | 11 | 5 | 15 | 0.516 | 2.53 |
+| `k119_32464` | 1,248 | **34** | 117 | 0 | 1.000 | 27.24 |
+
+The bin's own contigs over 10 kb span 0.857-1.000 on that share. **`k119_70945` sits at
+0.939, inside it**, with 69 pairs landing on bin contigs - and it is the only added
+contig long enough for the test to discriminate. That is the question the tiling left
+open: a second island copy in another genome would not put its mates on *Klebsiella*
+chromosome.
+
+**For the other three the test has no power, and we are saying so rather than reading
+the numbers.** Below 10 kb the bin's own contigs span 0.129-1.000 on the same measure,
+which covers anything an added contig could score; `k119_70596` (1.000) and
+`k119_25170` (0.516) are both inside that. One concrete fact does survive: `k119_32464`
+sends 34 pairs to `k119_45171`, and `k119_45171`'s largest single assigned partner is
+`k119_32464` - a hand-added contig ahead of every contig in the bin.
+
+**What is still not settled.** Both breaks in the tiling are at the repeat, and a
+repeat is the one place where graph adjacency can join paths from different sources.
+So it remains possible in principle that `k119_70945` sits on a second copy of the
+island in this sample. That is the one question the absence of the alternative is
+still carrying, and it is now one narrow question rather than the whole claim: in
+this sample the island's read depth is **33 times** the *E. coli* genome's, so an
+*E. coli* source would need 33 copies of a 50 kb island per *E. coli* cell. That
+ratio is the one in [RESULTS.md](RESULTS.md)'s carrier table and is recomputed by
+`verify_numbers.py`.
+
+**What does not change.** The correction itself stands: a typing run on a bin we
+assembled by hand is not independent evidence of what the added contigs belong to, and
+we had presented ICEKp10 as though it were. What has changed is that the question the
+typing begged is now answered by something else. Nothing in the primary result touches
+this - it is one sample's strain typing, and the CN-CRC *Klebsiella* count is
+unchanged at 2.
+
+**Shipped with this**: `data/kleborate/island_tiling.tsv`,
+`data/kleborate/island_locus.tsv`, `data/kleborate/contig_read_depth.tsv` and
+`data/kleborate/contig_links.tsv`, generated by `code/make_locus_table.py` and
+`code/make_link_table.py` from the measurement in `pipeline/asm_linkage.sh`, and
+recomputed with their assertions by `python3 code/verify_extra.py` (sections 8, 9
+and 10).
 
 ### One thing found while checking this
 
@@ -585,8 +747,11 @@ PITFALLS.md item 1.
 
 ### What this says about the pattern
 
-Items 13, 15, 16 and 17 are the same mistake four times, and the amendment above is a
-fifth. Each time, **a claim was correct in substance and wrong in what it attributed
+Items 13, 15, 16 and 17 are the same mistake four times, and the two amendments above
+are a fifth and a sixth. The second amendment is a variant worth naming on its own:
+there the claim was right and the evidence we offered for it was real but weak, and we
+had stopped at the weak evidence because we had framed the question in a way
+(four separate contigs) that made the strong evidence invisible. Each time, **a claim was correct in substance and wrong in what it attributed
 to the evidence we had.** Shipping the evidence is what exposed it: items 15 and 16
 were both found by someone asking for the underlying file, and the amendment was found
 by generating the file that claim depended on rather than re-reading the note that
@@ -697,8 +862,9 @@ the numbers in the prose from the shipped data**, so a figure went stale wheneve
 table was regenerated, and a figure computed from an input we do not ship could not be
 caught at all. Items 13, 15, 16 and the five above are all that single gap.
 
-`code/verify_numbers.py` now recomputes **84 of the numbers in these documents
-directly from `data/` and checks each one**, with the claimed value written beside the
+`code/verify_numbers.py` now recomputes **147 of the numbers in these documents
+directly from `data/` and checks each one** (84 when it was written; the amendment to
+item 16 added the rest), with the claimed value written beside the
 computation and a non-zero exit if any disagrees. It runs with no network and no
 working tree. A stale figure now fails a check instead of waiting to be noticed.
 

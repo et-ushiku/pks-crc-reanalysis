@@ -172,8 +172,12 @@ different seeds at the same depth, and **all five calls agree**. See
 | `data/missing_split.tsv` | Uncovered bases split inside/outside the duplication |
 | `data/clb_genes.bed` | The 18 gene intervals on AM229678.1 |
 | `code/analyse.py` | Reproduces the primary result from `data/` alone |
-| `code/verify_numbers.py` | Recomputes 84 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
+| `code/verify_numbers.py` | Recomputes 147 of the numbers written in these documents from `data/` and exits non-zero if any disagrees |
 | `code/verify_marker_scaling.py` | Measures the one assumption behind the abundance columns against an independent index that does not use marker length |
+| `data/kleborate/island_tiling.tsv` | The island contigs laid out on the island reference, with the overlap at each junction |
+| `data/kleborate/island_locus.tsv` | The insertion containing the island, tiled on a reference ruler, with each contig's *Klebsiella* chromosome alignments |
+| `data/kleborate/contig_read_depth.tsv` | Per-contig read depth from mapping the reads back to the whole assembly, beside megahit's `multi` |
+| `data/kleborate/contig_links.tsv` | Read pairs whose two mates land on different contigs, counted against assigned partners only |
 | `code/verify_rarefy.py` | Compares the analytic rarefaction against actually rarefied reads; largest gap 0.0211, all 5 calls agree |
 | `code/verify_extra.py` | Recomputes the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `code/verify_repeat.py` | Fetches AM229678.1 from ENA and recomputes the duplication - the only script here that needs network access |

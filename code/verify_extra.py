@@ -31,6 +31,13 @@ READ_LEN = 100             # nominal; cohorts run 84-100 bp
 PER_PCT = 313.0            # marker reads per 1% abundance per million reads
 
 
+KMER = 119            # megahit の最後の k。contig 名の k119_ がそれ
+ISLAND_BP = 54791     # AM229678.1 の長さ
+REPEAT_CONTIG = "k119_32464"
+REPEAT_START = 16066  # PITFALLS.md 1 番が参照だけから測った重複の開始
+REPEAT_GAP = 5653     # 同じ、2 つの複製の間隔
+
+
 def load(name):
     fh = io.open(os.path.join(DATA, name), encoding="utf-8")
     hd = fh.readline().rstrip("\n").split("\t")
@@ -411,9 +418,283 @@ def backbone():
     print()
     print("   C. koseri is not in this sample to be their source: its genome")
     print("   breadth never exceeds 0.028, and the clb island it carries is")
-    print("   itself 1.1% of its genome. So the argument is coverage depth plus")
-    print("   the absence of the alternative - weaker than section 5's single")
-    print("   contig, and not presented as equivalent to it.")
+    print("   itself 1.1% of its genome.")
+    print()
+    print("   **Those depths are megahit `multi` values, not read depths.**")
+    print("   This assembly was built to k=119 and the reads are 100 bp, so")
+    print("   `multi` is a multiplicity in the de Bruijn graph of reads plus")
+    print("   the contigs carried forward from smaller k. It is not")
+    print("   proportional to read depth and we never calibrated it. What it")
+    print("   does show is one contig at twice its neighbours, which is what a")
+    print("   collapsed two-copy repeat looks like. Sections 8 and 9 replace")
+    print("   this argument with evidence that is not depth at all.")
+
+
+def island_tiling():
+    print()
+    print("=" * 70)
+    print("8. The hand-added contigs are not four separate objects")
+    print("=" * 70)
+    print("   Section 7 argued about them one at a time, which is why only")
+    print("   coverage depth was left. They are not independent: laid out on")
+    print("   the island reference AM229678.1 they **overlap each other**.")
+    print()
+    rows = load("kleborate/island_tiling.tsv")
+    print("   %-5s %-12s %-6s %10s %10s %9s %8s %8s  %s"
+          % ("order", "contig", "in bin", "island", "to", "identity",
+             "coords", "sequence", ""))
+    for r in rows:
+        ov, sq = r["overlap_prev"], r["overlap_seq_bp"]
+        note = ""
+        if sq != "NA" and int(sq) == KMER:
+            note = "   <- exactly k = %d" % KMER
+        elif ov != "NA" and int(ov) < 0:
+            note = "   <- a gap inside one contig, not a junction"
+        print("   %-5s %-12s %-6s %10s %10s %8s%% %8s %8s%s"
+              % (r["order"], r["contig"], r["in_kp_bin"], r["island_start"],
+                 r["island_end"], r["identity"], ov, sq, note))
+    print()
+    print("   The last column is not a coordinate difference. It is the length")
+    print("   of identical sequence shared between the end of one contig and")
+    print("   the start of the next, taken from the contigs themselves.")
+    print()
+
+    prev = None
+    checked = 0
+    for r in rows:
+        if prev is not None and r["contig"] != prev:
+            assert int(r["overlap_prev"]) == KMER, \
+                "junction at %s: coordinate overlap %s, expected %d" % (
+                    r["contig"], r["overlap_prev"], KMER)
+            assert int(r["overlap_seq_bp"]) == KMER, \
+                "junction at %s: shared sequence %s bp, expected %d" % (
+                    r["contig"], r["overlap_seq_bp"], KMER)
+            checked += 1
+        prev = r["contig"]
+    print("   All %d junctions between different contigs are overlaps of" % checked)
+    print("   exactly %d bp - the k-mer length this assembly was built at." % KMER)
+    print("   Contigs sharing exactly k bases are consecutive nodes of one path:")
+    print("   megahit did not assemble four fragments. It assembled one island")
+    print("   and broke it twice.")
+    print()
+
+    rep = [r for r in rows if r["contig"] == REPEAT_CONTIG]
+    assert len(rep) == 2, "the repeat contig should appear twice"
+    a, b = int(rep[0]["island_start"]), int(rep[1]["island_start"])
+    print("   Where it broke: `%s`, which appears **twice** - island %d and"
+          % (REPEAT_CONTIG, a))
+    print("   island %d, a spacing of %d bp." % (b, b - a))
+    print("   PITFALLS.md item 1 measured that duplication independently, from")
+    print("   the reference alone: 1,287 bp starting at %d, the two copies %d"
+          % (REPEAT_START, REPEAT_GAP))
+    print("   bp apart, checked against ENA by verify_repeat.py.")
+    assert a == REPEAT_START, "repeat starts at %d, PITFALLS says %d" % (
+        a, REPEAT_START)
+    assert b - a == REPEAT_GAP, "spacing %d, PITFALLS says %d" % (
+        b - a, REPEAT_GAP)
+    print("   Same start, same spacing - and in section 7 that is the contig at")
+    print("   twice the depth. The assembly broke the island at the duplication,")
+    print("   which is what a collapsed two-copy repeat does.")
+    print()
+
+    cov = set()
+    for r in rows:
+        cov |= set(range(int(r["island_start"]), int(r["island_end"]) + 1))
+    print("   The four contigs cover %d of AM229678.1's %d bp (%.1f%%), from %d"
+          % (len(cov), ISLAND_BP, 100.0 * len(cov) / ISLAND_BP, min(cov)))
+    print("   to %d, at 99.76-100%% identity." % max(cov))
+    assert len(cov) / ISLAND_BP > 0.95, "the tiling should cover >95%"
+    inbin = sorted(set(r["contig"] for r in rows if r["in_kp_bin"] == "yes"))
+    assert inbin, "no tiling contig is in the automatic bin"
+    print("   One of them, %s, is in the automatic bin, and section 5 shows it"
+          % inbin[0])
+    print("   carrying 350 kb of Klebsiella chromosome into the island with no")
+    print("   drop in read depth across the join. **The other three reach the")
+    print("   chromosome through that contig, by overlap - not by depth.**")
+    print()
+    print("   What this does not settle: both breaks are at the repeat, and a")
+    print("   repeat is the one place where graph adjacency can join paths from")
+    print("   different sources. So it remains possible in principle that")
+    print("   k119_70945 belongs to a second copy of the island in this sample.")
+    print("   That is where the absence of the alternative is still doing work -")
+    print("   but it now carries one narrow question instead of the whole claim.")
+
+
+def island_locus():
+    print()
+    print("=" * 70)
+    print("9. The element sits at one site in the Klebsiella chromosome")
+    print("=" * 70)
+    rows = load("kleborate/island_locus.tsv")
+    el = [r for r in rows if r["region"] == "element"]
+    kp = [r for r in rows if r["region"] == "kp_chromosome"]
+    lo = min(int(r["ruler_start"]) for r in el)
+    hi = max(int(r["ruler_end"]) for r in el)
+    n = len(set(r["contig"] for r in el))
+    print("   The island is part of a larger insertion. Measured on the only one")
+    print("   of the six references that carries the whole element - C. koseri")
+    print("   BAA-895, used **as a ruler, not as a claim about where it came")
+    print("   from** - the element runs %d-%d (%d bp) and is tiled by %d contigs."
+          % (lo, hi, hi - lo, n))
+    print()
+    print("   %-12s %-6s %-6s %-14s %10s %10s %9s"
+          % ("contig", "bin", "added", "region", "start", "end", "aln bp"))
+    for r in sorted(rows, key=lambda x: (x["region"], int(x["ruler_start"]))):
+        print("   %-12s %-6s %-6s %-14s %10s %10s %9s"
+              % (r["contig"], r["in_kp_bin"], r["in_kp_plus"], r["region"],
+                 r["ruler_start"], r["ruler_end"], r["aln_bp"]))
+    print()
+    ends = {}
+    for r in el:
+        c = r["contig"]
+        s, e = int(r["ruler_start"]), int(r["ruler_end"])
+        o = ends.get(c, (s, e))
+        ends[c] = (min(o[0], s), max(o[1], e))
+    left = [c for c, (s, e) in ends.items() if s == lo][0]
+    right = [c for c, (s, e) in ends.items() if e == hi][0]
+    print("   The two ends of the element are reached by %s and %s." % (left, right))
+    for c in (left, right):
+        assert any(r["contig"] == c and r["in_kp_bin"] == "yes" for r in rows), \
+            "%s is not in the automatic bin" % c
+    print("   **Both are in the automatic bin.** Neither was added by hand.")
+    print()
+    print("   Their alignments to the Klebsiella chromosome:")
+    for r in sorted(kp, key=lambda x: int(x["ruler_start"])):
+        print("     %-12s %9s-%-9s %8s bp"
+              % (r["contig"], r["ruler_start"], r["ruler_end"], r["aln_bp"]))
+    ka = [int(r["ruler_end"]) for r in kp if r["contig"] == right]
+    kb = [int(r["ruler_start"]) for r in kp if r["contig"] == left]
+    joint = min(abs(x - y) for x in ka for y in kb)
+    print()
+    print("   %s leaves the chromosome at %d; %s picks it up at %d. The two"
+          % (right, max(ka), left, min(kb)))
+    print("   intervals meet within %d bp. **One insertion, one site, both" % joint)
+    print("   flanks in the automatic bin**, and the hand-added contigs fill the")
+    print("   interior. That is position, not depth and not similarity.")
+    assert joint < 100, "the two flanks do not meet: %d bp apart" % joint
+    print()
+    print("   k119_70945 is worth a line of its own: its backbone also aligns to")
+    print("   the Klebsiella chromosome, at 3,434,608-3,479,783, which falls")
+    print("   inside a stretch of HS11286 that k119_25144 skips. HS11286 carries")
+    print("   a related element at a different site. That is exactly why this")
+    print("   contig's similarity is ambiguous between the two genera, and why")
+    print("   item 16's similarity argument failed on it.")
+    added = set(r["contig"] for r in el if r["in_kp_plus"] == "yes")
+    print()
+    print("   %d of the %d tiling contigs were never added to the bin: the"
+          % (n - len(added), n))
+    print("   element is larger than the island, and the bin is not the whole")
+    print("   genome. Nothing in the typing depends on those.")
+
+
+def read_depth_and_links():
+    print()
+    print("=" * 70)
+    print("10. Read depth, measured, and read-pair linkage")
+    print("=" * 70)
+    print("   Section 7's depths were megahit `multi`. These are read depths from")
+    print("   one mapping of the reads back to the whole assembly (21,759 contigs,")
+    print("   one competitive index, MAPQ 20) - pipeline/asm_linkage.sh.")
+    print()
+    rows = load("kleborate/contig_read_depth.tsv")
+    byc = dict((r["contig"], r) for r in rows)
+    print("   %-12s %9s %8s %9s %9s %9s %10s"
+          % ("contig", "bp", "multi", "depth", "breadth", "/bin", "multi/depth"))
+    for c in ("kp_bin_all", "k119_45171", "k119_25144", "k119_70945",
+              "k119_70596", "k119_25170", "k119_32464"):
+        r = byc[c]
+        add = "" if r["in_kp_bin"] == "yes" else "   <- added by hand"
+        print("   %-12s %9s %8s %9s %9s %9s %10s%s"
+              % (c, r["contig_bp"], r["megahit_multi"], r["read_depth"],
+                 r["breadth"], r["depth_over_bin"], r["multi_over_depth"], add))
+    print()
+    big = [r for r in rows if r["in_kp_bin"] == "yes"
+           and r["contig"] != "kp_bin_all" and int(r["contig_bp"]) >= 10000]
+    lo = min(float(r["depth_over_bin"]) for r in big)
+    hi = max(float(r["depth_over_bin"]) for r in big)
+    print("   The bin's own %d contigs over 10 kb span %.2f-%.2f times the bin's"
+          % (len(big), lo, hi))
+    print("   depth. Three of the four added contigs are at %s, %s and %s;"
+          % tuple(byc[c]["depth_over_bin"]
+                  for c in ("k119_70945", "k119_70596", "k119_25170")))
+    print("   all inside that range. The fourth, k119_32464, is at %s - the"
+          % byc["k119_32464"]["depth_over_bin"])
+    print("   collapsed two-copy repeat, which has to be near 2.")
+    for c in ("k119_70945", "k119_70596", "k119_25170"):
+        v = float(byc[c]["depth_over_bin"])
+        assert lo <= v <= hi, "%s at %.3f is outside the bin's own range" % (c, v)
+    assert 1.7 < float(byc["k119_32464"]["depth_over_bin"]) < 2.3, \
+        "the collapsed repeat should sit near twice the bin"
+    print()
+    print("   **And this is where `multi` misled us.** multi/depth is %s-%s for"
+          % (min(byc[c]["multi_over_depth"] for c in
+                 ("k119_45171", "k119_25144", "k119_70945", "k119_70596",
+                  "k119_32464")),
+             max(byc[c]["multi_over_depth"] for c in
+                 ("k119_45171", "k119_25144", "k119_70945", "k119_70596",
+                  "k119_32464"))))
+    print("   five of the six contigs and %s for k119_25170. In read depth"
+          % byc["k119_25170"]["multi_over_depth"])
+    print("   k119_25170 is at %s of the bin, not the half that section 7's"
+          % byc["k119_25170"]["depth_over_bin"])
+    print("   `multi` column reported. See the amendment to CORRECTIONS item 16:")
+    print("   the reason to doubt that contig is its 137 bp of island, not depth.")
+    print()
+    print("   Read-pair linkage. Pairs whose two mates land on different contigs,")
+    print("   both at MAPQ 20. Partners are counted only when they are one of the")
+    print("   160 contigs the six-genome step assigned at breadth >= 0.5; the other")
+    print("   21,599 are other gut bacteria and pairs reaching them are shared")
+    print("   repeats.")
+    lk = load("kleborate/contig_links.tsv")
+    bylk = dict((r["contig"], r) for r in lk)
+    print()
+    print("   %-12s %9s %7s %7s %7s %7s %9s %9s"
+          % ("contig", "bp", "bin", "island", "other", "total", "share",
+             "bin/kb"))
+    for c in ("k119_45171", "k119_25144", "k119_70945", "k119_70596",
+              "k119_25170", "k119_32464"):
+        r = bylk[c]
+        add = "" if r["in_kp_bin"] == "yes" else "   <-"
+        print("   %-12s %9s %7s %7s %7s %7s %9.3f %9.2f%s"
+              % (c, r["contig_bp"], r["pairs_to_kp_bin"],
+                 r["pairs_to_added_island"], r["pairs_to_other_species"],
+                 r["pairs_assigned_total"],
+                 float(r["share_kp_bin_or_island"]),
+                 float(r["pairs_to_kp_bin_per_kb"]), add))
+    print()
+
+    def band(lo_bp, hi_bp):
+        v = [float(r["share_kp_bin_or_island"]) for r in lk
+             if r["in_kp_bin"] == "yes" and lo_bp <= int(r["contig_bp"]) < hi_bp
+             and int(r["pairs_assigned_total"]) > 0]
+        return (len(v), min(v), max(v)) if v else (0, 0, 0)
+
+    for a, b, nm in ((10000, 10 ** 9, "over 10 kb"), (2000, 10000, "2-10 kb"),
+                     (0, 2000, "under 2 kb")):
+        n, x, y = band(a, b)
+        print("   bin contigs %-11s %2d  share %.3f-%.3f" % (nm, n, x, y))
+    print()
+    n, x, y = band(10000, 10 ** 9)
+    v = float(bylk["k119_70945"]["share_kp_bin_or_island"])
+    print("   **k119_70945, at %.3f, is inside the range the bin's own contigs" % v)
+    print("   of that length occupy (%.3f-%.3f).** It is 63.9 kb, the only added"
+          % (x, y))
+    print("   contig long enough for this test to discriminate, and it does not")
+    print("   behave differently from a bin contig. Its mates reach %s pairs onto"
+          % bylk["k119_70945"]["pairs_to_kp_bin"])
+    print("   bin contigs. That is the question section 8 left open.")
+    assert x <= v <= y, "k119_70945 at %.3f is outside %.3f-%.3f" % (v, x, y)
+    print()
+    print("   **For the other three the test has no power and we say so.** Below")
+    print("   10 kb the bin's own contigs span %.3f-1.000, which covers every"
+          % band(2000, 10000)[1])
+    print("   value an added contig could take. k119_70596 (1.000) and")
+    print("   k119_25170 (%.3f) are both inside it. One concrete fact survives:"
+          % float(bylk["k119_25170"]["share_kp_bin_or_island"]))
+    print("   k119_32464 sends %s pairs to k119_45171, and k119_45171's single"
+          % "34")
+    print("   largest assigned partner is k119_32464 - a hand-added contig ahead")
+    print("   of every contig in the bin.")
 
 
 def main():
@@ -425,6 +706,9 @@ def main():
     assembly()
     typing()
     backbone()
+    island_tiling()
+    island_locus()
+    read_depth_and_links()
 
 
 if __name__ == "__main__":

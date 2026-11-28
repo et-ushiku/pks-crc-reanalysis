@@ -167,7 +167,7 @@ breadth is given because a species with breadth below ~0.1 is not really present
 | cancer_ERR1018282 | CRC | 3.0 | 3.5 (0.84) | **0.85** | 109.4 (0.89) | 0.03 | *E. coli* - **despite 109x Kp** |
 | cancer_ERR1018224 | CRC | 5.7 | 20.3 (0.89) | 0.28 | 0.005 (0.004) | - | *E. coli* by exclusion (nothing else present) |
 | n_ERR1018245 | control | 3.9 | 27.6 (0.95) | 0.14 | 1.09 (0.59) | 3.57 | *E. coli* by exclusion (Kp too shallow) |
-| **cancer_ERR1018186** | **CRC** | 13.5 | 0.41 (0.31) | **33** | 10.3 (0.88) | 1.30 | ***K. pneumoniae*, assembly-confirmed** ST23/K1 (automatic bin); ICEKp10 and a complete *clb* 2 only with the island contigs added - see [CORRECTIONS](CORRECTIONS.md) item 16 |
+| **cancer_ERR1018186** | **CRC** | 13.5 | 0.41 (0.31) | **33** | 10.3 (0.88) | 1.30 | ***K. pneumoniae*, assembly-confirmed** ST23/K1 (automatic bin); ICEKp10 and a complete *clb* 2 only with the island contigs added, which are placed in this genome by the island tiling and by the element's two flanks rather than by the typing - see [CORRECTIONS](CORRECTIONS.md) item 16 |
 | **n_ERR1018237** | **control** | 1.7 | **64.7 (0.81)** | **0.03** | 2.04 (0.76) | **0.84** | ***E. coli* cannot explain it** |
 | n_ERR1018240 | control | 2.7 | 3.5 (0.72) | 0.76 | 2.74 (0.83) | 0.97 | **undetermined - both fit** |
 | n_ERR1018238 | control | 2.5 | 8.3 (0.79) | 0.30 | 8.34 (0.91) | 0.30 | undetermined |
@@ -239,7 +239,7 @@ the 9.
 | *E. coli*, ratio 0.85-1.03 with no competing species | 4 | `cancer_ERR1018213`, `cancer_ERR1018229`, `cancer_ERR1018307`, `n_ERR1018246` |
 | *E. coli*, despite an abundant *Klebsiella* | 2 | `cancer_ERR1018198`, `cancer_ERR1018282` |
 | *E. coli* by exclusion, minority of cells | 2 | `cancer_ERR1018224`, `n_ERR1018245` |
-| ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) - contig `k119_45171`, 386,079 bp: *Klebsiella* chromosome to ~354,276 then the island to the end, with read depth never falling below 12 across the junction. See `data/assembly_alignment.tsv` and `python3 code/verify_extra.py` |
+| ***K. pneumoniae***, assembly-confirmed | 1 | `cancer_ERR1018186` (CRC) - contig `k119_45171`, 386,079 bp: *Klebsiella* chromosome to ~354,276 then the island to the end, with read depth never falling below 12 across the junction. The other three island contigs tile the same island with 119 bp overlaps - exactly the assembly's k - so they are one island with this contig, and the whole 137.7 kb insertion is flanked on both sides by contigs the automatic assignment placed in *Klebsiella*. See `data/assembly_alignment.tsv`, `data/kleborate/island_tiling.tsv`, `data/kleborate/island_locus.tsv` and `python3 code/verify_extra.py` |
 | ***K. pneumoniae***, *E. coli* excluded by coverage | 2 | `n_ERR1018237` (CN control), `n_CCMD39882286ST` (DE control) |
 | **Undetermined** (six-genome subset only) | 4 | `cancer_ERR1018219`, `n_ERR1018236`, `n_ERR1018238`, `n_ERR1018240` |
 | *E. coli* by marker ratio, DE-CRC (R 1.43-2.12, i.e. ~0.75-1.11 after the ~1.9x offset) | 8 | the other 8 DE-CRC positives |

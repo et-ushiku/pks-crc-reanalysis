@@ -21,6 +21,7 @@ bash on WSL/Linux. Comments and log output are in Japanese.
 | `asm_assemble.sh` | Assemble one sample with megahit, find the contigs carrying the island, and align them to the six genomes - the step that answers "whose island is it" rather than "not *E. coli*'s" |
 | `asm_junction.sh` | Remap the reads to the island-bearing contig and count the evidence spanning the chromosome/island join, which is what rules out an assembler chimera. Produces `../data/assembly_junction_depth.tsv` |
 | `asm_kleborate.sh` | Bin the contigs by species and run Kleborate (3.2.4, `-p kpsc`) on the *K. pneumoniae* bin. Its header records two earlier attempts that failed and why |
+| `asm_linkage.sh` | Map the reads back to the **whole** assembly (21,759 contigs, one competitive index, MAPQ 20) for per-contig read depth and for read pairs spanning two contigs. The header says why the index must not be the bin alone and why proper-pair filtering would delete the signal. Produces `../data/kleborate/contig_read_depth.tsv` and `../data/kleborate/contig_links.tsv` |
 | `asm_kleborate_plus.sh` | Add the island-bearing contigs to that bin and run Kleborate again. **Read this one before quoting the typing**: the ICEKp10 call comes only from here, and the header says why the addition was forced by the reference set and what it therefore cannot establish. See [../CORRECTIONS.md](../CORRECTIONS.md) item 16 |
 
 ## Conventions worth knowing before you reuse these

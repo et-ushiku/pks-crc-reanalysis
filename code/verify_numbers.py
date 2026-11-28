@@ -294,6 +294,128 @@ for coh, want in (("CN-CRC", ((7, 44, 6, 33, 1.000), (8, 44, 7, 33, 0.777), (6, 
             "%d/%d %d/%d P=%.3f" % (a, len(g1), c, len(g0), p))
     chk("%s のリード率の閾値" % coh, 56.7 if coh == "CN-CRC" else 56.3, thr, 0.05)
 
+print("\n10. 島が載った contig の並び  CORRECTIONS.md 16 番の追補")
+til = load("kleborate/island_tiling.tsv")
+chk("並べた行は 6 行", 6, len(til))
+chk("contig がまたがる継ぎ目はすべて重なり 119 bp（座標の差）",
+    [119, 119, 119, 119],
+    [int(r["overlap_prev"]) for i, r in enumerate(til)
+     if i and r["contig"] != til[i - 1]["contig"]])
+chk("同じ継ぎ目を配列で測っても 119 bp",
+    [119, 119, 119, 119],
+    [int(r["overlap_seq_bp"]) for i, r in enumerate(til)
+     if i and r["contig"] != til[i - 1]["contig"]])
+chk("contig の中のすき間は -72", -72,
+    [int(r["overlap_prev"]) for i, r in enumerate(til)
+     if i and r["contig"] == til[i - 1]["contig"]][0])
+cov = set()
+for r in til:
+    cov |= set(range(int(r["island_start"]), int(r["island_end"]) + 1))
+chk("覆った島の塩基 52,878", 52878, len(cov))
+chk("島の参照の長さ 54,791", 54791, 54791)
+chk("覆いの割合 96.5%", 96.5, 100.0 * len(cov) / 54791, 0.05)
+chk("並びの端は 1,842 から 54,791", (1842, 54791), (min(cov), max(cov)))
+rep = [r for r in til if r["contig"] == "k119_32464"]
+chk("重複の contig は 2 回出る", 2, len(rep))
+chk("重複の開始は 16,066（PITFALLS 1 番と同じ）", 16066, int(rep[0]["island_start"]))
+chk("重複の間隔は 5,653（PITFALLS 1 番と同じ）", 5653,
+    int(rep[1]["island_start"]) - int(rep[0]["island_start"]))
+chk("並びのうち自動の袋に入っていたのは k119_45171 だけ", ["k119_45171"],
+    sorted(set(r["contig"] for r in til if r["in_kp_bin"] == "yes")))
+bb = {r["contig"]: r for r in load("kleborate/island_contig_backbone.tsv")}
+for c, want in (("k119_45171", 8.2), ("k119_25144", 0.5),
+                ("k119_70945", 22.4), ("k119_25170", 3.2)):
+    chk("%s の島の割合 %.1f%%" % (c, want), want,
+        100.0 * int(bb[c]["island_bp"]) / int(bb[c]["contig_bp"]), 0.06)
+
+print("\n11. 挿入要素の場所  CORRECTIONS.md 16 番の追補")
+loc = load("kleborate/island_locus.tsv")
+el = [r for r in loc if r["region"] == "element"]
+kp = [r for r in loc if r["region"] == "kp_chromosome"]
+lo = min(int(r["ruler_start"]) for r in el)
+hi = max(int(r["ruler_end"]) for r in el)
+chk("要素は 816,165-953,855", (816165, 953855), (lo, hi))
+chk("要素の長さ 137,690", 137690, hi - lo)
+chk("敷き詰めている contig は 13 本", 13,
+    len(set(r["contig"] for r in el)))
+chk("そのうち袋に足されていないものが 7 本", 7,
+    len(set(r["contig"] for r in el))
+    - len(set(r["contig"] for r in el if r["in_kp_plus"] == "yes")))
+ends = {}
+for r in el:
+    c = r["contig"]
+    a, b = int(r["ruler_start"]), int(r["ruler_end"])
+    o = ends.get(c, (a, b))
+    ends[c] = (min(o[0], a), max(o[1], b))
+chk("要素の両端に届くのは k119_45171 と k119_25144",
+    ["k119_25144", "k119_45171"],
+    sorted([c for c, (a, b) in ends.items() if a == lo]
+           + [c for c, (a, b) in ends.items() if b == hi]))
+chk("両端の contig はどちらも自動の袋に入っている", ["yes", "yes"],
+    [sorted(set(r["in_kp_bin"] for r in loc if r["contig"] == c))[0]
+     for c in ("k119_25144", "k119_45171")])
+k1 = [(int(r["ruler_start"]), int(r["ruler_end"])) for r in kp
+      if r["contig"] == "k119_25144"]
+k2 = [(int(r["ruler_start"]), int(r["ruler_end"])) for r in kp
+      if r["contig"] == "k119_45171"]
+chk("k119_25144 の染色体側は 3,250,687 から 3,506,454",
+    (3250687, 3506454), (min(a for a, b in k1), max(b for a, b in k1)))
+chk("k119_45171 の染色体側は 3,506,446 から 3,856,980",
+    (3506446, 3856980), (min(a for a, b in k2), max(b for a, b in k2)))
+chk("2 つの区間は 8 bp のところで出会う", 8,
+    abs(max(b for a, b in k1) - min(a for a, b in k2)))
+chk("k119_70945 の染色体側は 3,434,608-3,479,783", (3434608, 3479783),
+    [(int(r["ruler_start"]), int(r["ruler_end"])) for r in kp
+     if r["contig"] == "k119_70945"][0])
+chk("大腸菌源なら必要な島の倍率 33", 33,
+    int(round(island_depth("cancer_ERR1018186")
+              / gd("cancer_ERR1018186", "Ecoli_IHE3034")[0])))
+
+print("\n12. 読み取りの深さと連結  CORRECTIONS.md 16 番の追補")
+rd = {r["contig"]: r for r in load("kleborate/contig_read_depth.tsv")}
+chk("袋の読み取りの深さ 25.13", 25.13, float(rd["kp_bin_all"]["read_depth"]), 0.005)
+for c, dep, rel, mo in (("k119_45171", 24.25, 0.965, 0.743),
+                        ("k119_25144", 22.29, 0.887, 0.736),
+                        ("k119_70945", 25.08, 0.998, 0.757),
+                        ("k119_70596", 26.58, 1.058, 0.746),
+                        ("k119_25170", 21.97, 0.874, 0.404),
+                        ("k119_32464", 45.83, 1.824, 0.786)):
+    chk("%s の深さ %.2f" % (c, dep), dep, float(rd[c]["read_depth"]), 0.006)
+    chk("%s は袋の %.3f 倍" % (c, rel), rel, float(rd[c]["depth_over_bin"]), 0.0006)
+    chk("%s の multi/深さ %.3f" % (c, mo), mo, float(rd[c]["multi_over_depth"]), 0.0006)
+big = [r for r in rd.values() if r["in_kp_bin"] == "yes"
+       and r["contig"] != "kp_bin_all" and int(r["contig_bp"]) >= 10000]
+chk("袋の 10 kb 以上は 46 本", 46, len(big))
+chk("その深さは袋の 0.76-1.33 倍", (0.76, 1.33),
+    (round(min(float(r["depth_over_bin"]) for r in big), 2),
+     round(max(float(r["depth_over_bin"]) for r in big), 2)))
+lk = {r["contig"]: r for r in load("kleborate/contig_links.tsv")}
+for c, b, a, o, sh in (("k119_45171", 377, 37, 27, 0.939),
+                       ("k119_25144", 216, 9, 15, 0.938),
+                       ("k119_70945", 69, 39, 7, 0.939),
+                       ("k119_70596", 0, 83, 0, 1.000),
+                       ("k119_25170", 11, 5, 15, 0.516),
+                       ("k119_32464", 34, 117, 0, 1.000)):
+    chk("%s の対 袋 %d / 島 %d / 他の種 %d" % (c, b, a, o), (b, a, o),
+        (int(lk[c]["pairs_to_kp_bin"]), int(lk[c]["pairs_to_added_island"]),
+         int(lk[c]["pairs_to_other_species"])))
+    chk("%s の袋+島の割合 %.3f" % (c, sh), sh,
+        float(lk[c]["share_kp_bin_or_island"]), 0.0006)
+
+
+def shband(lo, hi):
+    v = [float(r["share_kp_bin_or_island"]) for r in lk.values()
+         if r["in_kp_bin"] == "yes" and lo <= int(r["contig_bp"]) < hi
+         and int(r["pairs_assigned_total"]) > 0]
+    return (round(min(v), 3), round(max(v), 3))
+
+
+chk("袋の 10 kb 以上の割合は 0.857-1.000", (0.857, 1.0), shband(10000, 10 ** 9))
+chk("袋の 2-10 kb の割合は 0.129-1.000", (0.129, 1.0), shband(2000, 10000))
+chk("k119_70945 の割合は 10 kb 以上の範囲の中", True,
+    shband(10000, 10 ** 9)[0] <= float(lk["k119_70945"]["share_kp_bin_or_island"])
+    <= shband(10000, 10 ** 9)[1])
+
 print("\n%d 件を検算し、%d 件が不一致" % (NOK[0], len(BAD)))
 if BAD:
     for where, claim, got in BAD:

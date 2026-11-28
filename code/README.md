@@ -9,7 +9,7 @@ Python 3, standard library only. No arguments needed unless shown.
 | `analyse.py` | Reproduces the primary result: recomputes breadth from the depth histograms, rarefies to a common read count, applies the pre-specified gate, prints per-cohort tables and the Mantel-Haenszel meta-analysis |
 | `verify_extra.py` | Seven checks that each used to be impossible from `data/` alone: the DE-CRC depth difference, the density-ratio offset, the depth-adjusted regression, the carrier table, the assembly junction, the strain typing, and whether the island contigs belong to that genome |
 | `verify_rarefy.py` | Checks the analytic rarefying formula against actual subsampling, and that the disagreement is smaller than the seed-to-seed spread |
-| `verify_numbers.py` | Recomputes 84 of the numbers written in the prose - breadth ceiling, duplication cost, background, carrier ratios, the DE-CRC depth confound, the *K. pneumoniae* abundance column and both sensitivity tables - and exits non-zero if any disagrees |
+| `verify_numbers.py` | Recomputes 147 of the numbers written in the prose - breadth ceiling, duplication cost, background, carrier ratios, the DE-CRC depth confound, the *K. pneumoniae* abundance column, both sensitivity tables and the island contig tiling - and exits non-zero if any disagrees |
 | `verify_marker_scaling.py` | Tests the one assumption behind the abundance columns - that marker reads scale with marker length - against the six-genome index, which does not involve marker length. Asserts the interval contains 1 and excludes the unscaled alternative |
 
 ```
@@ -65,6 +65,8 @@ are visible rather than buried in the file.
 | `make_clb_in_genomes.py` | `data/clb_in_six_genomes.tsv` - which reference genomes carry a *clb* island of their own |
 | `make_backbone_table.py` | `data/kleborate/island_contig_backbone.tsv`, `data/kleborate/contig_depth.tsv` - each island contig's non-island portion and its coverage depth |
 | `make_marker_table.py` | `data/marker_counts.tsv` - raw marker read counts per sample per SGB, which the abundance columns are computed from and which were not shipped before |
+| `make_locus_table.py` | `data/kleborate/island_tiling.tsv`, `data/kleborate/island_locus.tsv` - how the island contigs overlap each other on the island reference, and where the element they belong to sits in the *Klebsiella* chromosome |
+| `make_link_table.py` | `data/kleborate/contig_read_depth.tsv`, `data/kleborate/contig_links.tsv` - per-contig read depth (not megahit `multi`) and read pairs spanning two contigs, from `pipeline/asm_linkage.sh` |
 
 `make_clb_in_genomes.py` is the exception to "will not run here": it needs only an
 island FASTA, `data/clb_genes.bed` and the six-genome FASTA, and does exact 40-mer

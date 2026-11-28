@@ -95,6 +95,15 @@ and 6,500 bp exists** - so the repeat is not continued further by an indel-shift
 segment. (The remaining duplicated k-mers are the 8 bp period VNTR in the
 *clbB*-*clbR* intergenic region, which Auvray et al. describe separately.)
 
+**The repeat also turns up on its own in an assembly.** `cancer_ERR1018186` was
+assembled de novo and the island came out in four contigs. One of them, `k119_32464`,
+is 1,248 bp, aligns to the island at **16,066** and again at **21,719** - the same
+start and the same 5,653 bp spacing measured above - and carries twice the k-mer
+multiplicity of its neighbours, which is what a collapsed two-copy repeat has to do.
+The assembler broke the island at exactly the two copies. That measurement shares no
+inputs with the k-mer scan above: see [CORRECTIONS.md](CORRECTIONS.md) item 16 and
+`data/kleborate/island_tiling.tsv`.
+
 We do not claim their figure is wrong. They worked from their own hybrid assemblies
 and may have measured in a different strain or under a different definition of
 "homologous". We report what is measurable in the reference everyone maps to. Anyone
